@@ -2,6 +2,10 @@
 
 Visual arithmetic PWA for a young learner, installed on an Android tablet and hosted on GitHub Pages at https://jmerk-bot.github.io/felix-math-lab/. See README.md for the layout and install steps. Personal context about the learner is in CLAUDE.local.md (gitignored, since this repo is public).
 
+## Shared origin: keep storage names unique
+
+A sibling copy, `addy-math-lab` (in `~/code/addy-math-lab`), is also served from `https://jmerk-bot.github.io`, so the two apps share localStorage and Cache Storage. This app uses the `STORAGE_KEY` `math-lab:v1` (`js/state.js`) and caches named `math-lab-<version>` (`sw.js`). The other app's names start with `addy-math-lab`. The service worker deletes only old caches whose names start with `math-lab-`. Never broaden that cleanup, or this app could wipe the other app's offline copy on a shared device.
+
 ## Conventions
 
 - No build step, no dependencies, no frameworks. Plain HTML, CSS and ES modules. Keep it that way unless asked.
