@@ -12,6 +12,8 @@ Visual arithmetic PWA for a young learner, installed on an Android tablet and ho
 - Subtraction is stored as `'-'` but always displayed via `OP_LABEL` (`−`).
 - Color coding is part of the teaching and should stay consistent: blue = A / first number, amber = B / second number, green = target/answer, rose = taken away, indigo = UI accent.
 - `playChime(step)` plays step `step` of an ascending C-major pentatonic scale from C4 (bigger numbers sound higher, without wrapping). Steppers pass the value itself.
+- Quest answers come from the on-screen number pad (`pressKey()` in `js/quest.js`), which fills the mystery box directly. Don't add `<input>` fields: the Android keyboard pushes the layout around. Digits chime their own pentatonic note.
+- The app runs fullscreen (`"display": "fullscreen"` in the manifest). `js/pwa.js` also requests fullscreen on tap for copies installed before that change.
 - Lab limits per operation are in `limits()` in `js/lab.js`. Quests must stay within those limits so "Test in the Lab" can show them. A − B and A ÷ B go up to 20.
 
 ## When adding files

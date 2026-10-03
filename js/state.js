@@ -15,7 +15,9 @@ export const state = {
   quest: {
     filters: [...OPS],
     problem: null,
-    status: 'playing' // 'playing', 'correct', 'retry'
+    status: 'playing', // 'playing', 'correct', 'retry'
+    entry: '', // digits typed on the number pad
+    replaceOnType: false // after a miss, the next digit starts a fresh answer
   }
 };
 

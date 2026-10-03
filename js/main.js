@@ -4,7 +4,7 @@
 import { state, loadState, saveState } from './state.js';
 import { playChime } from './audio.js';
 import { clampLab, renderLab, setLabOp, stepA, stepB } from './lab.js';
-import { generateNewQuest, renderQuest, submitQuestAnswer, toggleQuestFilter } from './quest.js';
+import { generateNewQuest, pressKey, renderQuest, toggleQuestFilter } from './quest.js';
 import { initPwa } from './pwa.js';
 
 const $ = (id) => document.getElementById(id);
@@ -52,7 +52,8 @@ const actions = {
   'step-b': (value) => stepB(Number(value)),
   'quest-filter': (value) => toggleQuestFilter(value),
   'quest-new': () => generateNewQuest(),
-  'quest-to-lab': () => sendQuestToLab()
+  'quest-to-lab': () => sendQuestToLab(),
+  'key': (value) => pressKey(value)
 };
 
 document.addEventListener('click', (event) => {
@@ -62,9 +63,16 @@ document.addEventListener('click', (event) => {
   saveState();
 });
 
-$('quest-form').addEventListener('submit', (event) => {
+// A physical keyboard drives the number pad too (handy when testing on a computer)
+document.addEventListener('keydown', (event) => {
+  if (state.mode !== 'quest' || event.metaKey || event.ctrlKey || event.altKey) return;
+  const key = /^[0-9]$/.test(event.key) ? event.key
+    : event.key === 'Backspace' ? 'back'
+    : event.key === 'Enter' ? 'solve'
+    : null;
+  if (!key) return;
   event.preventDefault();
-  submitQuestAnswer();
+  pressKey(key);
   saveState();
 });
 

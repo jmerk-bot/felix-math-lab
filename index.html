@@ -135,10 +135,30 @@
         </div>
 
         <div id="quest-active-controls" class="quest-active-controls">
-          <form id="quest-form" class="quest-input-row" autocomplete="off">
-            <input id="quest-input-val" class="solve-input" type="number" inputmode="numeric" placeholder="?" />
-            <button class="solve-btn" type="submit">Solve ➔</button>
-          </form>
+          <!-- On-screen number pad. Digits fill the mystery box, so the tablet keyboard never opens. -->
+          <div class="keypad" role="group" aria-label="Number pad">
+            <button class="key" data-action="key" data-value="1">1</button>
+            <button class="key" data-action="key" data-value="2">2</button>
+            <button class="key" data-action="key" data-value="3">3</button>
+            <button class="key" data-action="key" data-value="4">4</button>
+            <button class="key" data-action="key" data-value="5">5</button>
+            <button class="key" data-action="key" data-value="6">6</button>
+            <button class="key" data-action="key" data-value="7">7</button>
+            <button class="key" data-action="key" data-value="8">8</button>
+            <button class="key" data-action="key" data-value="9">9</button>
+            <button class="key key-back" data-action="key" data-value="back" aria-label="Delete">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 5H8.5L3 12l5.5 7H21a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/>
+                <path d="M11.5 9.5l5 5M16.5 9.5l-5 5"/>
+              </svg>
+            </button>
+            <button class="key" data-action="key" data-value="0">0</button>
+            <button class="key key-solve" data-action="key" data-value="solve" aria-label="Solve">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12.5l4.5 4.5L19 7.5"/>
+              </svg>
+            </button>
+          </div>
           <button class="send-lab-btn" data-action="quest-to-lab">🧪 Test &amp; Explore this in the Lab</button>
         </div>
 

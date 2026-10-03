@@ -1,4 +1,4 @@
-// Offline support and picking up new versions on the tablet.
+// Fullscreen, offline support, and picking up new versions on the tablet.
 //
 // sw.js serves every file network-first, so whenever the tablet is online it
 // loads the newest deploy, and offline it falls back to the last copy it saw.
@@ -41,8 +41,21 @@ async function reloadIfOutdated() {
   location.reload();
 }
 
+// The manifest asks for fullscreen, but a copy installed before that can keep
+// running in standalone mode (status bar showing) until Chrome refreshes it.
+// In that case, switch to fullscreen on the next tap. Never in a browser tab.
+function goFullscreenOnTap() {
+  if (!matchMedia('(display-mode: standalone)').matches) return;
+  if (!document.documentElement.requestFullscreen) return;
+  document.addEventListener('click', () => {
+    if (document.fullscreenElement) return;
+    document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+  });
+}
+
 export function initPwa() {
   document.getElementById('app-version').textContent = isDev ? 'dev' : `v${APP_VERSION}`;
+  goFullscreenOnTap();
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});

@@ -682,8 +682,9 @@ header {
 }
 
 .mystery-box {
-  width: 60px;
+  min-width: 60px;
   height: 60px;
+  padding: 0 8px;
   border-radius: 14px;
   background: #312e81;
   border: 2px dashed var(--accent-indigo-light);
@@ -692,6 +693,44 @@ header {
   align-items: center;
   justify-content: center;
   font-size: 36px;
+}
+
+/* Digits typed on the number pad, in the color of the number they stand for */
+.mystery-box.filled {
+  border-style: solid;
+}
+
+.mystery-box.filled.role-b {
+  color: var(--accent-amber);
+}
+
+.mystery-box.filled.role-target {
+  color: var(--accent-green-light);
+}
+
+.mystery-box.correct {
+  border: 2px solid var(--accent-emerald);
+  background: rgba(16, 185, 129, 0.18);
+  color: var(--accent-green-light);
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.45);
+}
+
+/* A gentle "not yet" shake after a wrong answer */
+.mystery-box.wiggle {
+  animation: wiggle 0.4s ease;
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  50% { transform: translateX(6px); }
+  75% { transform: translateX(-3px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mystery-box.wiggle {
+    animation: none;
+  }
 }
 
 .quest-active-controls {
@@ -706,44 +745,56 @@ header {
   justify-content: center;
 }
 
-.quest-input-row {
-  display: flex;
-  justify-content: center;
+/* ---------- Number pad ---------- */
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
+  width: 100%;
+  max-width: 330px;
 }
 
-.solve-input {
-  width: 100px;
-  height: 52px;
-  border-radius: 12px;
-  border: 2px solid var(--accent-indigo);
-  background: #020617;
-  color: #ffffff;
-  font-family: inherit;
-  font-size: 26px;
+.key {
+  height: clamp(54px, 8.5vh, 72px);
+  border-radius: 14px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: var(--text-main);
+  font-size: 30px;
   font-weight: 800;
-  text-align: center;
-  outline: none;
-  -moz-appearance: textfield;
-}
-
-.solve-input::-webkit-outer-spin-button,
-.solve-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.solve-btn {
-  padding: 0 24px;
-  height: 52px;
-  border-radius: 12px;
-  background: var(--accent-indigo);
-  color: #ffffff;
-  font-weight: 800;
-  font-size: 16px;
-  border: none;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 0 #0f172a;
+  transition: transform 0.08s ease, background 0.08s ease;
+}
+
+.key:active {
+  transform: translateY(2px) scale(0.97);
+  background: #334155;
+  box-shadow: 0 1px 0 #0f172a;
+}
+
+.key svg {
+  width: 30px;
+  height: 30px;
+}
+
+.key-back {
+  color: var(--text-muted);
+}
+
+.key-solve {
+  background: var(--accent-indigo);
+  border-color: var(--accent-indigo-light);
+  color: #ffffff;
+  box-shadow: 0 3px 0 #312e81, 0 4px 14px rgba(79, 70, 229, 0.4);
+}
+
+.key-solve:active {
+  background: #4338ca;
 }
 
 .send-lab-btn {

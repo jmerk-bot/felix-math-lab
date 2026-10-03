@@ -58,13 +58,14 @@ export function generateNewQuest() {
     expected: hideAns ? ans : qb
   };
   state.quest.status = 'playing';
-  $('quest-input-val').value = '';
+  state.quest.entry = '';
+  state.quest.replaceOnType = false;
 
   renderQuest();
 }
 
 export function renderQuest() {
-  const { filters, problem: q, status } = state.quest;
+  const { filters, problem: q, status, entry } = state.quest;
 
   document.querySelectorAll('.filter-pill').forEach(pill => {
     pill.classList.toggle('active', filters.includes(pill.dataset.value));
@@ -75,12 +76,18 @@ export function renderQuest() {
   $('quest-num-a').textContent = q.a;
   $('quest-op-badge').textContent = OP_LABEL[q.op];
 
+  // The mystery box shows what Felix has typed on the number pad, in the
+  // color of the number it stands for (amber for B, green for the answer)
+  const role = q.missing === 'b' ? 'role-b' : 'role-target';
+  const fill = status === 'correct' ? 'correct' : entry ? 'filled' : '';
+  const box = `<span class="mystery-box ${role} ${fill}">${entry || '?'}</span>`;
+
   if (q.missing === 'b') {
-    $('quest-slot-b').innerHTML = '<span class="mystery-box">?</span>';
+    $('quest-slot-b').innerHTML = box;
     $('quest-slot-result').innerHTML = `<span class="num-target">${q.target}</span>`;
   } else {
     $('quest-slot-b').innerHTML = `<span class="num-b">${q.b}</span>`;
-    $('quest-slot-result').innerHTML = '<span class="mystery-box">?</span>';
+    $('quest-slot-result').innerHTML = box;
   }
 
   const a = `<strong class="num-a">${q.a}</strong>`;
@@ -107,18 +114,47 @@ export function renderQuest() {
   tag.textContent = solved ? 'Brilliant! Match found! ⭐' : 'Almost! Test in Lab 👇';
 }
 
-export function submitQuestAnswer() {
-  const input = $('quest-input-val');
-  const val = parseInt(input.value, 10);
-  if (Number.isNaN(val) || !state.quest.problem) return; // ignore an empty Solve tap
+// Every quest answer is 36 or less, so two digits is enough
+const MAX_DIGITS = 2;
 
-  if (val === state.quest.problem.expected) {
-    state.quest.status = 'correct';
-    input.blur(); // close the on-screen keyboard so "Next Quest" is visible
-    playSuccessChord();
+// Number pad: key is '0'–'9', 'back' or 'solve'
+export function pressKey(key) {
+  const quest = state.quest;
+  if (!quest.problem || quest.status === 'correct') return;
+
+  if (key === 'solve') {
+    submitQuestAnswer();
+    return;
+  }
+
+  if (key === 'back') {
+    if (!quest.entry) return;
+    quest.entry = quest.entry.slice(0, -1);
+    quest.replaceOnType = false;
+    playChime(0);
   } else {
-    state.quest.status = 'retry';
-    playChime(1);
+    if (quest.replaceOnType || quest.entry === '0') quest.entry = '';
+    quest.replaceOnType = false;
+    if (quest.entry.length >= MAX_DIGITS) return;
+    quest.entry += key;
+    playChime(Number(key));
   }
   renderQuest();
+}
+
+function submitQuestAnswer() {
+  const quest = state.quest;
+  if (!quest.entry) return; // ignore an empty Solve tap
+
+  if (parseInt(quest.entry, 10) === quest.problem.expected) {
+    quest.status = 'correct';
+    playSuccessChord();
+    renderQuest();
+  } else {
+    quest.status = 'retry';
+    quest.replaceOnType = true; // keep the guess on screen until the next digit
+    playChime(1);
+    renderQuest();
+    document.querySelector('.quest-equation .mystery-box')?.classList.add('wiggle');
+  }
 }
