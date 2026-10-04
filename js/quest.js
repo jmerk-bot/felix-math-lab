@@ -94,7 +94,14 @@ export function renderQuest() {
   const target = `<strong class="num-target">${q.target}</strong>`;
   const b = (mystery) => `<strong class="num-b">${q.missing === 'b' ? mystery : q.b}</strong>`;
   const guide = $('quest-guide-text');
-  if (q.op === '+') {
+  if (q.missing === 'result') {
+    // The answer is the mystery here, so the guide asks for it instead of naming it
+    const green = (text) => `<strong class="num-target">${text}</strong>`;
+    if (q.op === '+') guide.innerHTML = `Start with ${a} and add ${b()}. ${green('How many altogether?')}`;
+    else if (q.op === '-') guide.innerHTML = `Start with ${a} and take away ${b()}. ${green('How many are left?')}`;
+    else if (q.op === '×') guide.innerHTML = `A grid of ${a} rows of ${b()}. ${green('How many in total?')}`;
+    else guide.innerHTML = `Share ${a} into ${b()} equal groups. ${green('How many in each group?')}`;
+  } else if (q.op === '+') {
     guide.innerHTML = `Start with ${a} and add ${b('a mystery amount')} to make ${target}.`;
   } else if (q.op === '-') {
     guide.innerHTML = `Start with ${a} and remove ${b('a mystery amount')} until ${target} remain.`;
@@ -112,6 +119,35 @@ export function renderQuest() {
   tag.hidden = status === 'playing';
   tag.className = `quest-tag ${status}`;
   tag.textContent = solved ? 'Brilliant! Match found! ⭐' : 'Almost! Test in Lab 👇';
+}
+
+// Reminder banner shown in the Lab while a quest is open. It repeats the quest
+// with the ? still hidden (never the answer) plus a hint for using the Lab.
+export function renderQuestBanner(show) {
+  const banner = $('lab-quest-banner');
+  banner.hidden = !show;
+  if (!show) return;
+
+  const q = state.quest.problem;
+  const mystery = '<span class="mini-mystery">?</span>';
+  const b = q.missing === 'b' ? mystery : `<span class="num-b">${q.b}</span>`;
+  const result = q.missing === 'result' ? mystery : `<span class="num-target">${q.target}</span>`;
+  $('banner-equation').innerHTML =
+    `<span class="num-a">${q.a}</span><span class="op-symbol">${OP_LABEL[q.op]}</span>${b}<span class="equals">=</span>${result}`;
+
+  const amber = (text) => `<strong class="num-b">${text}</strong>`;
+  const green = (text) => `<strong class="num-target">${text}</strong>`;
+  let hint;
+  if (q.missing === 'b') {
+    hint = q.op === '÷'
+      ? `Change the ${amber('groups')} until each group gets ${green(q.target)}.`
+      : `Change the ${amber('second number')} until you get ${green(q.target)}.`;
+  } else {
+    hint = q.op === '÷'
+      ? `Make ${amber(`${q.b} groups`)}, then look at the answer.`
+      : `Make the ${amber('second number')} ${amber(q.b)}, then look at the answer.`;
+  }
+  $('banner-hint').innerHTML = hint;
 }
 
 // Every quest answer is 36 or less, so two digits is enough

@@ -4,7 +4,7 @@
 import { state, loadState, saveState } from './state.js';
 import { playChime } from './audio.js';
 import { clampLab, renderLab, setLabOp, stepA, stepB } from './lab.js';
-import { generateNewQuest, pressKey, renderQuest, toggleQuestFilter } from './quest.js';
+import { generateNewQuest, pressKey, renderQuest, renderQuestBanner, toggleQuestFilter } from './quest.js';
 import { initPwa } from './pwa.js';
 
 const $ = (id) => document.getElementById(id);
@@ -20,9 +20,7 @@ function switchMode(newMode, { boot = false } = {}) {
   // Remind Felix of the quest he's working on while he's in the Lab
   // (not on launch, before he's seen the quest)
   const q = state.quest.problem;
-  const showBanner = !boot && newMode === 'lab' && !!q && state.quest.status !== 'correct';
-  $('lab-quest-banner').hidden = !showBanner;
-  if (showBanner) $('banner-target-val').textContent = q.target;
+  renderQuestBanner(!boot && newMode === 'lab' && !!q && state.quest.status !== 'correct');
 
   if (newMode === 'quest' && !q) {
     generateNewQuest();

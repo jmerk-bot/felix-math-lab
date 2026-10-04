@@ -16,6 +16,9 @@ A sibling copy, `addy-math-lab` (in `~/code/addy-math-lab`), is also served from
 - Subtraction is stored as `'-'` but always displayed via `OP_LABEL` (`−`).
 - Color coding is part of the teaching and should stay consistent: blue = A / first number, amber = B / second number, green = target/answer, rose = taken away, indigo = UI accent.
 - `playChime(step)` plays step `step` of an ascending C-major pentatonic scale from C4 (bigger numbers sound higher, without wrapping). Steppers pass the value itself.
+- Never show a quest's hidden number anywhere while the quest is open: not in the quest view, the Problem Guide, or the Lab banner (`renderQuestBanner()`). When the answer is the mystery, ask for it ("How many altogether?").
+- Tap targets are at least 44px, and main controls 48–60px. Don't shrink buttons below that.
+- Font is Atkinson Hyperlegible Next, self-hosted in `fonts/` (variable weight 200–800, so weight 900 renders as 800). Use it for numbers too, not monospace.
 - Quest answers come from the on-screen number pad (`pressKey()` in `js/quest.js`), which fills the mystery box directly. Don't add `<input>` fields: the Android keyboard pushes the layout around. Digits chime their own pentatonic note.
 - The app runs fullscreen (`"display": "fullscreen"` in the manifest). `js/pwa.js` also requests fullscreen on tap for copies installed before that change.
 - Lab limits per operation are in `limits()` in `js/lab.js`. Quests must stay within those limits so "Test in the Lab" can show them. A − B and A ÷ B go up to 20.

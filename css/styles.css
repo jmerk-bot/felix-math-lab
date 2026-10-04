@@ -1,3 +1,14 @@
+/* Atkinson Hyperlegible Next: designed for legibility, with clearly distinct
+   letters and digits. Served from the app (not a CDN) so it works offline.
+   Latin subset, variable weight 200–800. License: fonts/OFL.txt */
+@font-face {
+  font-family: 'Atkinson Hyperlegible Next';
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url('../fonts/atkinson-hyperlegible-next-latin.woff2') format('woff2');
+}
+
 :root {
   --bg: #090d16;
   --card-bg: rgba(22, 30, 49, 0.88);
@@ -12,7 +23,7 @@
   --accent-rose: #f43f5e;
   --accent-indigo: #4f46e5;
   --accent-indigo-light: #818cf8;
-  --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Atkinson Hyperlegible", sans-serif;
+  --font-family: "Atkinson Hyperlegible Next", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 * {
@@ -109,30 +120,25 @@ header {
 }
 
 .brand h1 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.brand p {
-  font-size: 11px;
-  color: var(--text-muted);
-  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 .mode-toggle {
   display: flex;
   background: #1e293b;
-  padding: 3px;
-  border-radius: 10px;
+  padding: 4px;
+  border-radius: 12px;
   border: 1px solid #334155;
 }
 
 .mode-btn {
   border: none;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 12px;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 9px;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
   color: var(--text-muted);
@@ -174,34 +180,54 @@ header {
   background: rgba(49, 46, 129, 0.55);
   border: 1px solid rgba(99, 102, 241, 0.4);
   border-radius: 14px;
-  padding: 10px 14px;
+  padding: 12px 14px;
   display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   justify-content: space-between;
   align-items: center;
 }
 
-.banner-title {
-  font-size: 13px;
+.banner-equation {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.banner-equation .op-symbol {
+  font-size: 22px;
+  padding: 0 6px;
+}
+
+.mini-mystery {
+  min-width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #312e81;
+  border: 2px dashed var(--accent-indigo-light);
+  color: #fde047;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.banner-hint {
+  margin-top: 4px;
+  font-size: 14px;
   color: var(--text-soft);
-}
-
-.banner-target {
-  color: var(--accent-green-light);
-  font-size: 16px;
-}
-
-.banner-sub {
-  font-size: 11px;
-  color: var(--text-muted);
 }
 
 .banner-btn {
   background: var(--accent-indigo);
   color: #ffffff;
   border: none;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 12px;
+  min-height: 48px;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -254,14 +280,14 @@ header {
 
 .op-selector-group {
   display: flex;
-  gap: 5px;
+  gap: 6px;
 }
 
 .op-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  font-size: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  font-size: 26px;
   font-weight: 800;
   cursor: pointer;
   border: 1px solid #334155;
@@ -291,8 +317,10 @@ header {
   background: rgba(22, 30, 49, 0.6);
   border: 1px solid var(--card-border);
   border-radius: 14px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   align-items: center;
   justify-content: space-between;
 }
@@ -333,13 +361,13 @@ header {
 }
 
 .stepper-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
   background: #334155;
   border: none;
   color: #fff;
-  font-size: 18px;
+  font-size: 26px;
   font-weight: 800;
   cursor: pointer;
   display: flex;
@@ -352,9 +380,9 @@ header {
 }
 
 .stepper-val {
-  font-size: 20px;
+  font-size: 26px;
   font-weight: 800;
-  width: 26px;
+  width: 36px;
   text-align: center;
 }
 
@@ -366,8 +394,9 @@ header {
   border: 1px solid rgba(251, 191, 36, 0.3);
   padding: 2px 8px;
   border-radius: 999px;
-  font-family: monospace;
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .ten-frames-container {
@@ -589,8 +618,9 @@ header {
 
 .tick-label {
   margin-top: 4px;
-  font-size: 10px;
-  font-family: monospace;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
   color: #64748b;
 }
 
@@ -632,10 +662,10 @@ header {
 }
 
 .filter-pill {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  font-size: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  font-size: 22px;
   font-weight: 800;
   border: 1px solid #334155;
   background: #1e293b;
@@ -665,9 +695,11 @@ header {
   background: transparent;
   border: 1px solid #475569;
   color: var(--text-muted);
-  font-size: 11px;
-  padding: 4px 8px;
-  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
   cursor: pointer;
 }
 
@@ -801,21 +833,23 @@ header {
   background: rgba(30, 41, 59, 0.8);
   border: 1px solid #475569;
   color: var(--text-soft);
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 13px;
+  min-height: 52px;
+  padding: 0 20px;
+  border-radius: 12px;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
   margin-top: 6px;
 }
 
 .next-quest-btn {
-  padding: 14px 24px;
-  border-radius: 12px;
+  min-height: 60px;
+  padding: 0 32px;
+  border-radius: 14px;
   background: var(--accent-emerald);
   color: #020617;
   font-weight: 900;
-  font-size: 16px;
+  font-size: 18px;
   border: none;
   cursor: pointer;
   align-self: center;

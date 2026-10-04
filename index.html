@@ -8,9 +8,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Math Lab">
+  <meta name="apple-mobile-web-app-title" content="Felix's Lab">
   <title>Felix's Math Lab</title>
   <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preload" href="fonts/atkinson-hyperlegible-next-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="icon" href="icons/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="stylesheet" href="css/styles.css">
@@ -20,10 +21,7 @@
   <header>
     <div class="brand">
       <div class="brand-icon">F</div>
-      <div>
-        <h1>Felix's Math Lab</h1>
-        <p>Visual &amp; Spatial Arithmetic • 2e Space</p>
-      </div>
+      <h1>Felix's Math Lab</h1>
     </div>
     <div class="mode-toggle">
       <button id="tab-lab" class="mode-btn active" data-action="mode" data-value="lab">Explore</button>
@@ -34,11 +32,10 @@
   <main class="app-container">
     <!-- Active quest reminder, shown inside the Lab -->
     <div id="lab-quest-banner" class="quest-banner" hidden>
-      <div>
-        <span class="banner-title">
-          Quest Target: <strong id="banner-target-val" class="banner-target">12</strong>
-        </span>
-        <p class="banner-sub">Adjust the counters until your total reaches this target</p>
+      <div class="banner-body">
+        <!-- The quest itself, with the ? still hidden (filled by renderQuestBanner) -->
+        <div id="banner-equation" class="banner-equation"></div>
+        <p id="banner-hint" class="banner-hint"></p>
       </div>
       <button class="banner-btn" data-action="mode" data-value="quest">Back to Quest ➔</button>
     </div>

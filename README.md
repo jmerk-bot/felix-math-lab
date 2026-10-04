@@ -44,6 +44,7 @@ Then open http://localhost:8765. The footer shows `dev` locally.
 | `js/version.js` | Version placeholder, stamped at deploy time. |
 | `sw.js` | Service worker: network-first with offline fallback. |
 | `manifest.webmanifest` | App name, colors, icons. |
+| `fonts/` | Atkinson Hyperlegible Next (latin subset, variable weight), served from the app so it works offline. License in `fonts/OFL.txt`. |
 | `icons/` | `icon.svg` / `icon-maskable.svg` sources plus rendered PNGs. |
 | `scripts/make-icons.sh` | Re-renders the PNG icons from the SVGs (needs Google Chrome). |
 

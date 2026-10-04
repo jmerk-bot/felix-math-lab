@@ -23,6 +23,7 @@ const APP_SHELL = [
   './js/quest.js',
   './js/pwa.js',
   './js/version.js',
+  './fonts/atkinson-hyperlegible-next-latin.woff2',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
