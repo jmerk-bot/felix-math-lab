@@ -1,10 +1,25 @@
 # Felix's Math Lab
 
-Visual arithmetic PWA for a young learner, installed on an Android tablet and hosted on GitHub Pages at https://jmerk-bot.github.io/felix-math-lab/. See README.md for the layout and install steps. Personal context about the learner is in CLAUDE.local.md (gitignored, since this repo is public).
+Visual arithmetic and phonics-spelling PWA for a young learner, installed on an Android tablet and hosted on GitHub Pages at https://jmerk-bot.github.io/felix-math-lab/. See README.md for the layout and install steps. Personal context about the learner is in CLAUDE.local.md (gitignored, since this repo is public).
 
 ## Shared origin: keep storage names unique
 
 A sibling copy, `addy-math-lab` (in `~/code/addy-math-lab`), is also served from `https://jmerk-bot.github.io`, so the two apps share localStorage and Cache Storage. This app uses the `STORAGE_KEY` `math-lab:v1` (`js/state.js`) and caches named `math-lab-<version>` (`sw.js`). The other app's names start with `addy-math-lab`. The service worker deletes only old caches whose names start with `math-lab-`. Never broaden that cleanup, or this app could wipe the other app's offline copy on a shared device.
+
+## How the app is organized
+
+- It always opens on **Home**, which offers **Words** (spelling, `js/spell.js`) or **Math** (Explore `js/lab.js` / Mystery Quest `js/quest.js`). `state.mode` is `'home' | 'lab' | 'quest' | 'spell'`. The header title follows the mode (Felix's Lab / Math Lab / Word Lab), and a home button shows everywhere except Home.
+- In Math, after every `SPELL_EVERY` solved quests (`js/state.js`, currently 3), the next "Next Quest" (or Skip on a solved quest) opens a spelling word as a **Word break**: math tabs hidden, then "Back to Math". Finishing any spelling word resets the countdown. Explore time isn't counted.
+
+## Spelling words
+
+- Words, tiles and spoken feedback live in `js/words.js`. Only words spelled the way they sound at the current stage: short vowels, digraphs (sh, ch, th, wh, ck) and blends. **No silent e**, vowel teams, r-controlled vowels or irregular words (e.g. "wolf") until the user says that stage is reached.
+- Each word lists its `sounds`, one per sound box, and every sound must be a keyboard tile (digraphs are one tile). The list validates itself on load and logs a console error on a mismatch.
+- Pictures are emoji. Use emoji from 2020 or earlier so Android shows them, and avoid two words with the same emoji.
+- After adding words, run `node scripts/make-audio.mjs` (macOS only: uses `say -v Samantha` and `afconvert`) to record `audio/words/<word>.m4a`. Audio isn't in `APP_SHELL`: `js/pwa.js` sends `ALL_AUDIO` to the service worker, which caches it for offline use.
+- Clips play through Web Audio (`playClips()` in `js/audio.js`), not `<audio>` elements, so there are no partial responses to cache.
+- Checking a word keeps the right boxes (locked green) and clears the wrong ones. After two misses, empty boxes show a faint hint, so a word can always be finished. Words that took that long come back a couple of words later.
+- Tile colors are consistent everywhere: vowels yellow, consonants white, digraphs teal.
 
 ## Conventions
 
@@ -25,7 +40,7 @@ A sibling copy, `addy-math-lab` (in `~/code/addy-math-lab`), is also served from
 
 ## When adding files
 
-Add any new file the app loads to `APP_SHELL` in `sw.js`, or it won't be cached for offline use. A missing file in `APP_SHELL` makes the service worker install fail, so double-check the paths.
+Add any new file the app loads to `APP_SHELL` in `sw.js`, or it won't be cached for offline use (spelling audio is the exception, see above). A missing file in `APP_SHELL` makes the service worker install fail, so double-check the paths.
 
 ## Testing
 

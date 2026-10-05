@@ -184,6 +184,7 @@ function submitQuestAnswer() {
 
   if (parseInt(quest.entry, 10) === quest.problem.expected) {
     quest.status = 'correct';
+    quest.solvedSinceSpelling++;
     playSuccessChord();
     renderQuest();
   } else {

@@ -1,12 +1,18 @@
 // App state, shared helpers, and saving/restoring between launches.
 
+import { LEVELS } from './words.js';
+
 export const OPS = ['+', '-', '×', '÷'];
+
+// In Math, a spelling word comes up after this many solved Mystery Quests
+export const SPELL_EVERY = 3;
 
 // Subtraction is stored as '-' but shown with a proper minus sign.
 export const OP_LABEL = { '+': '+', '-': '−', '×': '×', '÷': '÷' };
 
 export const state = {
-  mode: 'lab',
+  mode: 'home', // 'home', 'lab', 'quest' or 'spell'
+  mathView: 'lab', // where "Math" on the home screen goes: 'lab' or 'quest'
   lab: {
     a: 6,
     b: 3,
@@ -17,7 +23,18 @@ export const state = {
     problem: null,
     status: 'playing', // 'playing', 'correct', 'retry'
     entry: '', // digits typed on the number pad
-    replaceOnType: false // after a miss, the next digit starts a fresh answer
+    replaceOnType: false, // after a miss, the next digit starts a fresh answer
+    solvedSinceSpelling: 0
+  },
+  spell: {
+    levels: LEVELS.map(l => l.id),
+    word: null, // entry from WORDS
+    boxes: [], // one tile (or null) per sound box
+    locked: [], // boxes confirmed correct by a check
+    attempts: 0,
+    status: 'playing', // 'playing', 'correct', 'retry'
+    queue: [], // upcoming words (shuffled)
+    returnTo: null // 'quest' when this word interrupted Math
   }
 };
 
@@ -33,19 +50,24 @@ export function compute(a, b, op) {
 
 // ---------- Persistence ----------
 // The tablet may close the app in the background, so the Lab settings, quest
-// filters and an unsolved quest are kept in localStorage and restored on launch.
+// filters, an unsolved quest, spelling levels and the spelling countdown are
+// kept in localStorage and restored on launch. The app always opens on Home.
 
 const STORAGE_KEY = 'math-lab:v1';
 
 export function saveState() {
   try {
-    const { mode, lab, quest } = state;
+    const { mathView, lab, quest, spell } = state;
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      mode,
+      mathView,
       lab,
       quest: {
         filters: quest.filters,
-        problem: quest.status === 'correct' ? null : quest.problem
+        problem: quest.status === 'correct' ? null : quest.problem,
+        solvedSinceSpelling: quest.solvedSinceSpelling
+      },
+      spell: {
+        levels: spell.levels
       }
     }));
   } catch (e) {}
@@ -60,7 +82,8 @@ export function loadState() {
   }
   if (!saved || typeof saved !== 'object') return;
 
-  if (saved.mode === 'lab' || saved.mode === 'quest') state.mode = saved.mode;
+  const mathView = saved.mathView ?? saved.mode; // older saves stored `mode`
+  if (mathView === 'lab' || mathView === 'quest') state.mathView = mathView;
 
   const lab = saved.lab;
   if (lab && OPS.includes(lab.op) && Number.isInteger(lab.a) && Number.isInteger(lab.b)) {
@@ -76,6 +99,15 @@ export function loadState() {
   const problem = saved.quest?.problem;
   if (isValidProblem(problem) && state.quest.filters.includes(problem.op)) {
     state.quest.problem = problem;
+  }
+
+  const solved = saved.quest?.solvedSinceSpelling;
+  if (Number.isInteger(solved) && solved >= 0) state.quest.solvedSinceSpelling = solved;
+
+  const levels = saved.spell?.levels;
+  if (Array.isArray(levels)) {
+    const valid = LEVELS.map(l => l.id).filter(id => levels.includes(id));
+    if (valid.length) state.spell.levels = valid;
   }
 }
 

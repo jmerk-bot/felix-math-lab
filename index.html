@@ -20,16 +20,76 @@
 <body>
   <header>
     <div class="brand">
+      <button id="home-btn" class="home-btn" data-action="home" aria-label="Home" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 11.5L12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/>
+        </svg>
+      </button>
       <div class="brand-icon">F</div>
-      <h1>Felix's Math Lab</h1>
+      <h1 id="app-title">Felix's Lab</h1>
     </div>
-    <div class="mode-toggle">
+    <div id="math-tabs" class="mode-toggle" hidden>
       <button id="tab-lab" class="mode-btn active" data-action="mode" data-value="lab">Explore</button>
       <button id="tab-quest" class="mode-btn" data-action="mode" data-value="quest">Mystery Quest 🎯</button>
     </div>
   </header>
 
   <main class="app-container">
+    <!-- HOME: pick Words or Math -->
+    <div id="view-home" class="view home">
+      <button class="home-card home-words" data-action="pick-words">
+        <span class="home-visual" aria-hidden="true">
+          <span class="tile tile-consonant">c</span><span class="tile tile-vowel">a</span><span class="tile tile-consonant">t</span>
+        </span>
+        <span class="home-label">Words</span>
+      </button>
+      <button class="home-card home-math" data-action="pick-math">
+        <span class="home-visual" aria-hidden="true">
+          <span class="num-a">1</span><span class="op-symbol">+</span><span class="num-b">2</span>
+        </span>
+        <span class="home-label">Math</span>
+      </button>
+    </div>
+
+    <!-- WORDS: spelling -->
+    <div id="view-spell" class="view" hidden>
+      <section class="card spell-card">
+        <div class="quest-toolbar spell-toolbar">
+          <div id="spell-levels" class="filter-pills-row">
+            <span class="toolbar-label">WORDS:</span>
+            <button class="level-pill active" data-action="spell-level" data-value="cat">cat</button>
+            <button class="level-pill active" data-action="spell-level" data-value="ship">ship</button>
+            <button class="level-pill active" data-action="spell-level" data-value="frog">frog</button>
+          </div>
+          <span id="spell-bonus" class="bonus-chip" hidden>⭐ Word break</span>
+          <div class="toolbar-right">
+            <span id="spell-tag" class="quest-tag" hidden></span>
+            <button class="skip-btn" data-action="spell-skip">Skip ↻</button>
+          </div>
+        </div>
+
+        <div class="spell-main">
+          <div class="spell-prompt">
+            <!-- Tap the picture or the speaker to hear the word again -->
+            <button id="spell-pic" class="spell-pic" data-action="spell-say" aria-label="Hear the word"></button>
+            <button class="say-btn" data-action="spell-say" aria-label="Hear the word">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/>
+                <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>
+              </svg>
+            </button>
+          </div>
+          <div class="spell-work">
+            <div id="spell-boxes" class="sound-boxes"></div>
+            <div id="spell-keyboard" class="tile-keyboard" role="group" aria-label="Letter tiles"></div>
+            <div id="spell-solved" class="quest-solved-controls" hidden>
+              <button id="spell-next" class="next-quest-btn" data-action="spell-next">Next Word ➔</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
     <!-- Active quest reminder, shown inside the Lab -->
     <div id="lab-quest-banner" class="quest-banner" hidden>
       <div class="banner-body">
@@ -41,7 +101,7 @@
     </div>
 
     <!-- VIEW 1: EXPLORE LAB -->
-    <div id="view-lab" class="view">
+    <div id="view-lab" class="view" hidden>
       <section class="card">
         <div class="equation-bar">
           <div class="equation-display">
@@ -119,7 +179,7 @@
           </div>
           <div class="toolbar-right">
             <span id="quest-tag-status" class="quest-tag" hidden></span>
-            <button class="skip-btn" data-action="quest-new">Skip ↻</button>
+            <button class="skip-btn" data-action="quest-skip">Skip ↻</button>
           </div>
         </div>
 
@@ -160,7 +220,7 @@
         </div>
 
         <div id="quest-solved-controls" class="quest-solved-controls" hidden>
-          <button class="next-quest-btn" data-action="quest-new">Next Quest 🚀</button>
+          <button class="next-quest-btn" data-action="quest-next">Next Quest 🚀</button>
         </div>
 
         <div class="clue-panel">

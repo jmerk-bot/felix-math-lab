@@ -878,6 +878,342 @@ header {
   color: var(--text-soft);
 }
 
+/* ---------- Header: home button ---------- */
+
+.home-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.home-btn svg {
+  width: 26px;
+  height: 26px;
+}
+
+/* ---------- Home: pick Words or Math ---------- */
+
+.home {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  min-height: calc(100dvh - 160px);
+  align-content: center;
+}
+
+.home-card {
+  min-height: 300px;
+  border-radius: 24px;
+  border: 2px solid #334155;
+  background: var(--card-bg);
+  color: var(--text-main);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  cursor: pointer;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45);
+  transition: transform 0.1s ease;
+}
+
+.home-card:active {
+  transform: scale(0.97);
+}
+
+.home-words {
+  border-color: #2dd4bf;
+}
+
+.home-math {
+  border-color: var(--accent-indigo-light);
+}
+
+.home-visual {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 52px;
+  font-weight: 800;
+}
+
+.home-visual .tile {
+  width: 62px;
+  height: 70px;
+  font-size: 40px;
+}
+
+.home-visual .op-symbol {
+  font-size: 40px;
+}
+
+.home-label {
+  font-size: 34px;
+  font-weight: 800;
+}
+
+/* ---------- Letter tiles (keyboard, sound boxes, home card) ---------- */
+/* Vowels yellow, consonants white, digraphs teal, the same everywhere */
+
+.tile {
+  border-radius: 12px;
+  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.tile-consonant {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.tile-vowel {
+  background: #fcd34d;
+  border-color: #f59e0b;
+  color: #422006;
+}
+
+.tile-digraph {
+  background: #99f6e4;
+  border-color: #2dd4bf;
+  color: #134e4a;
+}
+
+/* ---------- Words: spelling ---------- */
+
+.level-pill {
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-size: 20px;
+  font-weight: 800;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.level-pill.active {
+  background: var(--accent-indigo);
+  border-color: var(--accent-indigo-light);
+  color: #fff;
+}
+
+.bonus-chip {
+  font-size: 16px;
+  font-weight: 800;
+  color: #fde047;
+  background: rgba(251, 191, 36, 0.15);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  padding: 10px 16px;
+  border-radius: 999px;
+}
+
+.spell-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.spell-prompt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.spell-pic {
+  width: 170px;
+  height: 150px;
+  border-radius: 24px;
+  border: 1px solid #1e293b;
+  background: rgba(2, 6, 23, 0.5);
+  font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+  font-size: 104px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.spell-pic.celebrate {
+  animation: celebrate 0.7s ease;
+}
+
+@keyframes celebrate {
+  0%, 100% { transform: scale(1) rotate(0); }
+  30% { transform: scale(1.15) rotate(-6deg); }
+  60% { transform: scale(1.1) rotate(5deg); }
+}
+
+.say-btn {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent-indigo);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.45);
+}
+
+.say-btn:active {
+  transform: scale(0.95);
+}
+
+.say-btn svg {
+  width: 38px;
+  height: 38px;
+}
+
+.spell-work {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* One box per sound */
+.sound-boxes {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.sound-box {
+  min-width: 76px;
+  height: 76px;
+  padding: 0 8px;
+  border-radius: 14px;
+  border: 3px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.sound-box.empty {
+  border: 3px dashed #475569;
+  background: rgba(2, 6, 23, 0.6);
+}
+
+.sound-box .ghost {
+  color: #475569;
+}
+
+.sound-box.locked {
+  box-shadow: 0 0 0 3px var(--accent-emerald);
+}
+
+.sound-box.correct {
+  box-shadow: 0 0 0 3px var(--accent-emerald), 0 0 18px rgba(16, 185, 129, 0.55);
+}
+
+.wiggle {
+  animation: wiggle 0.4s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wiggle,
+  .spell-pic.celebrate {
+    animation: none;
+  }
+}
+
+.tile-keyboard {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.tile-keyboard .tile {
+  height: clamp(50px, 6.8vh, 66px);
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(15, 23, 42, 0.8);
+  transition: transform 0.08s ease;
+}
+
+.tile-keyboard .tile:active {
+  transform: translateY(2px) scale(0.96);
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.8);
+}
+
+.tile-keyboard .wide {
+  grid-column: span 2;
+}
+
+.tile-keyboard .tile-back {
+  background: #1e293b;
+  border-color: #334155;
+  color: var(--text-muted);
+}
+
+.tile-keyboard .tile-check {
+  background: var(--accent-indigo);
+  border-color: var(--accent-indigo-light);
+  color: #fff;
+}
+
+.tile-keyboard svg {
+  width: 30px;
+  height: 30px;
+}
+
+/* Landscape tablet: picture on the left, boxes and tiles on the right */
+@media (orientation: landscape) and (min-width: 960px) {
+  body[data-mode="spell"] header,
+  body[data-mode="spell"] .app-container {
+    max-width: 1040px;
+  }
+
+  .spell-main {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) 2.4fr;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .spell-prompt {
+    flex-direction: column;
+  }
+
+  .spell-pic {
+    width: 200px;
+    height: 180px;
+    font-size: 124px;
+  }
+
+  .tile-keyboard {
+    max-width: 680px;
+  }
+
+  .tile-keyboard .tile {
+    height: clamp(54px, 8.5vh, 72px);
+  }
+}
+
 /* ---------- Footer ---------- */
 
 .app-version {

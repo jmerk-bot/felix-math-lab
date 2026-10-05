@@ -12,6 +12,8 @@ const CACHE = 'math-lab-__APP_VERSION__';
 const NETWORK_TIMEOUT_MS = 3000;
 
 // Everything the app needs to start offline. Add new files here.
+// (Spelling audio is listed in js/words.js; the page sends that list over
+// once the worker is running. See the 'precache' message below.)
 const APP_SHELL = [
   './',
   './index.html',
@@ -23,6 +25,8 @@ const APP_SHELL = [
   './js/quest.js',
   './js/pwa.js',
   './js/version.js',
+  './js/spell.js',
+  './js/words.js',
   './fonts/atkinson-hyperlegible-next-latin.woff2',
   './manifest.webmanifest',
   './icons/icon-192.png',
@@ -62,6 +66,25 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(networkFirst(request));
 });
 
+// The page sends the spelling audio list (from js/words.js) so every word and
+// phrase is saved for offline use, not just the ones already heard.
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'precache' && Array.isArray(event.data.urls)) {
+    event.waitUntil(precache(event.data.urls));
+  }
+});
+
+async function precache(urls) {
+  const cache = await caches.open(CACHE);
+  for (const url of urls) {
+    if (new URL(url).origin !== self.location.origin || await cache.match(url)) continue;
+    try {
+      const response = await fetch(url, { cache: 'no-cache' });
+      if (response.status === 200) await cache.put(url, response);
+    } catch (e) {} // offline: try again next launch
+  }
+}
+
 async function networkFirst(request) {
   const cache = await caches.open(CACHE);
 
@@ -71,7 +94,8 @@ async function networkFirst(request) {
     : new Request(request, { cache: 'no-cache' });
 
   const network = fetch(freshRequest).then((response) => {
-    if (response.ok) cache.put(request, response.clone());
+    // Only whole responses: a 206 (partial) can't be cached
+    if (response.status === 200) cache.put(request, response.clone());
     return response;
   });
   network.catch(() => {}); // handled below; avoids an unhandled-rejection warning

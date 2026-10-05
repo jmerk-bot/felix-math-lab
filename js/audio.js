@@ -1,7 +1,13 @@
-// Pure Web Audio synth: warm marimba-ish tones and a celebration chord.
-// No audio files, so it works offline with nothing extra to cache.
+// Web Audio: synth tones (chimes, celebration chord, tile taps) and recorded
+// speech clips (spelling words and feedback, from audio/).
 
 let audioCtx = null;
+
+function ctx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
 
 // C major pentatonic (C D E G A), as semitones above C.
 const PENTATONIC = [0, 2, 4, 7, 9];
@@ -15,16 +21,14 @@ function pentatonicFreq(step) {
   return BASE_FREQ * 2 ** (semitones / 12);
 }
 
-function playTone(freq, delay = 0) {
+function playTone(freq, delay = 0, level = 0.2) {
   try {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    const t = audioCtx.currentTime + delay;
+    const ac = ctx();
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    const t = ac.currentTime + delay;
     // Soften notes above C6 so the top of the scale doesn't get shrill
-    const peak = 0.2 * Math.min(1, Math.sqrt(1046.5 / freq));
+    const peak = level * Math.min(1, Math.sqrt(1046.5 / freq));
 
     osc.type = 'sine';
     osc.frequency.setValueAtTime(freq, t);
@@ -34,7 +38,7 @@ function playTone(freq, delay = 0) {
     gain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
 
     osc.connect(gain);
-    gain.connect(audioCtx.destination);
+    gain.connect(ac.destination);
     osc.start(t);
     osc.stop(t + 0.5);
   } catch (e) {}
@@ -47,4 +51,64 @@ export function playChime(step = 0) {
 
 export function playSuccessChord() {
   [261.63, 329.63, 392.0, 523.25].forEach((f, i) => playTone(f, i * 0.08));
+}
+
+// A soft, neutral tap for the letter tiles
+export function playTick() {
+  playTone(659.25, 0, 0.08);
+}
+
+// ---------- Speech clips ----------
+// Clips are fetched and decoded with Web Audio rather than played through an
+// <audio> element, which avoids range requests the service worker can't cache.
+
+const buffers = new Map();
+let current = null; // the clip playing now, so a new one can cut it off
+let sequence = 0;
+
+async function loadClip(url) {
+  if (!buffers.has(url)) {
+    buffers.set(url, fetch(url)
+      .then((res) => res.arrayBuffer())
+      .then((data) => ctx().decodeAudioData(data))
+      .catch((e) => { buffers.delete(url); throw e; }));
+  }
+  return buffers.get(url);
+}
+
+function playBuffer(buffer) {
+  return new Promise((resolve) => {
+    const source = ctx().createBufferSource();
+    source.buffer = buffer;
+    source.connect(ctx().destination);
+    source.onended = () => resolve();
+    current = source;
+    source.start();
+  });
+}
+
+export function stopClips() {
+  sequence++;
+  try { current?.stop(); } catch (e) {}
+  current = null;
+}
+
+// Plays clips one after another, stopping anything already playing.
+// Missing or undecodable clips are skipped.
+export async function playClips(...urls) {
+  stopClips();
+  const mine = sequence;
+  for (const url of urls) {
+    try {
+      const buffer = await loadClip(url);
+      if (mine !== sequence) return;
+      await playBuffer(buffer);
+      if (mine !== sequence) return;
+    } catch (e) {}
+  }
+}
+
+// Fetch and decode clips ahead of time so the first play has no delay
+export function preloadClips(urls) {
+  urls.forEach((url) => loadClip(url).catch(() => {}));
 }
