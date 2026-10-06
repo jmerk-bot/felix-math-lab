@@ -11,6 +11,15 @@ A sibling copy, `addy-math-lab` (in `~/code/addy-math-lab`), is also served from
 - It always opens on **Home**, which offers **Words** (spelling, `js/spell.js`) or **Math** (Explore `js/lab.js` / Mystery Quest `js/quest.js`). `state.mode` is `'home' | 'lab' | 'quest' | 'spell'`. The header title follows the mode (Felix's Lab / Math Lab / Word Lab), and a home button shows everywhere except Home.
 - In Math, after every `SPELL_EVERY` solved quests (`js/state.js`, currently 3), the next "Next Quest" (or Skip on a solved quest) opens a spelling word as a **Word break**: math tabs hidden, then "Back to Math". Finishing any spelling word resets the countdown. Explore time isn't counted.
 
+## Levels (Mystery Quest and the Lab)
+
+- Five levels in `js/levels.js`: 1 early 2nd grade, 2 2nd, 3 3rd, 4 4th, 5 5th, whole numbers only. Felix picks one on the climbing meter to the right of Mystery Quest (`.level-rail`, top = 5). It's saved as `state.quest.level` (default 1).
+- Each level defines its quest generator (`numbers()`), its Lab limits (`lab: { op: [A max, B max] }`) and `maxDigits` for the number pad. Every quest a level makes must fit inside that level's Lab limits, so "Test in the Lab" can always show it. When changing a generator, re-check with a loop over thousands of `makeProblem()` calls.
+- The Lab picks its picture by number size: + and − ten-frames (to 20), base-ten blocks (to 999), place-value chart (above); × arrays (to 10 × 10), area model (above); ÷ sharing buckets (to 100 ÷ 10), sharing in big chunks / partial quotients (above). The number line's range grows to fit (20, 50, 100, 200, 500, …).
+- Lab controls: a simple − / + stepper when the range is 20 or less, otherwise one ▲▼ column per place value. A digit step that would go past the limit is ignored, not clamped.
+- Numbers of 1,000 and up show with commas (`fmt()`), and equations shrink their type as the numbers get longer (`data-size`).
+- Fractions and decimals (grades 4–5) are planned as the next round: new question types, an answer pad and Lab pictures.
+
 ## Spelling words
 
 - Words, tiles and spoken feedback live in `js/words.js`. Only words spelled the way they sound at the current stage: short vowels, digraphs (sh, ch, th, wh, ck) and blends. **No silent e**, vowel teams, r-controlled vowels or irregular words (e.g. "wolf") until the user says that stage is reached.
@@ -34,9 +43,9 @@ A sibling copy, `addy-math-lab` (in `~/code/addy-math-lab`), is also served from
 - Never show a quest's hidden number anywhere while the quest is open: not in the quest view, the Problem Guide, or the Lab banner (`renderQuestBanner()`). When the answer is the mystery, ask for it ("How many altogether?").
 - Tap targets are at least 44px, and main controls 48–60px. Don't shrink buttons below that.
 - Font is Atkinson Hyperlegible Next, self-hosted in `fonts/` (variable weight 200–800, so weight 900 renders as 800). Use it for numbers too, not monospace.
-- Quest answers come from the on-screen number pad (`pressKey()` in `js/quest.js`), which fills the mystery box directly. Don't add `<input>` fields: the Android keyboard pushes the layout around. Digits chime their own pentatonic note.
+- Quest answers come from the on-screen number pad (`pressKey()` in `js/quest.js`), which fills the mystery box directly, up to the level's `maxDigits` (never the length of the actual answer). Don't add `<input>` fields: the Android keyboard pushes the layout around. Digits chime their own pentatonic note.
 - The app runs fullscreen (`"display": "fullscreen"` in the manifest). `js/pwa.js` also requests fullscreen on tap for copies installed before that change.
-- Lab limits per operation are in `limits()` in `js/lab.js`. Quests must stay within those limits so "Test in the Lab" can show them. A − B and A ÷ B go up to 20.
+- Lab limits come from the current level (`limits()` in `js/lab.js` reads `LEVELS[level].lab`). See Levels above.
 
 ## When adding files
 

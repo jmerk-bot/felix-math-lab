@@ -24,7 +24,8 @@ export const state = {
     status: 'playing', // 'playing', 'correct', 'retry'
     entry: '', // digits typed on the number pad
     replaceOnType: false, // after a miss, the next digit starts a fresh answer
-    solvedSinceSpelling: 0
+    solvedSinceSpelling: 0,
+    level: 1 // 1 (early 2nd grade) to 5 (5th grade), see js/levels.js
   },
   spell: {
     levels: LEVELS.map(l => l.id),
@@ -64,7 +65,8 @@ export function saveState() {
       quest: {
         filters: quest.filters,
         problem: quest.status === 'correct' ? null : quest.problem,
-        solvedSinceSpelling: quest.solvedSinceSpelling
+        solvedSinceSpelling: quest.solvedSinceSpelling,
+        level: quest.level
       },
       spell: {
         levels: spell.levels
@@ -100,6 +102,9 @@ export function loadState() {
   if (isValidProblem(problem) && state.quest.filters.includes(problem.op)) {
     state.quest.problem = problem;
   }
+
+  const level = saved.quest?.level;
+  if (Number.isInteger(level) && level >= 1 && level <= 5) state.quest.level = level;
 
   const solved = saved.quest?.solvedSinceSpelling;
   if (Number.isInteger(solved) && solved >= 0) state.quest.solvedSinceSpelling = solved;

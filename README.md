@@ -2,7 +2,7 @@
 
 A visual, hands-on learning app with two sides, picked on the home screen:
 
-- **Math:** ten-frames, arrays, equal-sharing buckets and a number line for +, −, × and ÷, plus "Mystery Quest" problems with one hidden number.
+- **Math:** a Lab for exploring +, −, × and ÷ with pictures (ten-frames, base-ten blocks, place-value charts, arrays, area models, equal sharing and a number line), plus "Mystery Quest" problems with one hidden number at five levels, from early 2nd grade to 5th grade.
 - **Words:** phonics spelling. Hear a word, see its picture, and build it from letter tiles in sound boxes (one box per sound, with digraphs like "sh" as single tiles). A spelling word also comes up after every few math quests.
 
 It's a Progressive Web App (PWA). Install it once on a tablet and it opens full-screen from the home screen, works offline, and updates itself whenever a new version is pushed.
@@ -39,8 +39,9 @@ Then open http://localhost:8765. The footer shows `dev` locally.
 | `index.html` | Page markup. Buttons use `data-action` / `data-value` instead of inline handlers. |
 | `css/styles.css` | All styles. Colors are CSS variables at the top. |
 | `js/main.js` | Entry point: wires buttons, moves between Home, Words and Math (and the word breaks), boots the app. |
-| `js/lab.js` | Explore Lab: limits, steppers, ten-frames, arrays, sharing buckets, number line. |
-| `js/quest.js` | Mystery Quest: problem generator, answer checking. |
+| `js/lab.js` | Explore Lab: steppers, and the pictures for each number size (ten-frames to area models), number line. |
+| `js/quest.js` | Mystery Quest: rendering, level meter, number pad, answer checking. |
+| `js/levels.js` | The five levels: quest generators, Lab limits and answer lengths. |
 | `js/state.js` | Shared state, `compute()`, `SPELL_EVERY`, and save/restore via `localStorage`. |
 | `js/spell.js` | Words: sound boxes, tile keyboard, checking and hints. |
 | `js/words.js` | Spelling word lists, letter tiles and spoken feedback phrases. |

@@ -128,11 +128,8 @@
             <div class="swatch-circle"></div>
             <span id="label-a" class="control-label">First (A)</span>
           </div>
-          <div class="stepper-row">
-            <button class="stepper-btn" data-action="step-a" data-value="-1">-</button>
-            <span id="val-a" class="stepper-val num-a">6</span>
-            <button class="stepper-btn" data-action="step-a" data-value="1">+</button>
-          </div>
+          <!-- − value + for small numbers, or one ▲▼ column per place value (renderLab) -->
+          <div id="stepper-a" class="stepper-row"></div>
         </div>
 
         <div class="control-box">
@@ -140,15 +137,11 @@
             <div class="swatch-diamond"></div>
             <span id="label-b" class="control-label">Second (B)</span>
           </div>
-          <div class="stepper-row">
-            <button class="stepper-btn" data-action="step-b" data-value="-1">-</button>
-            <span id="val-b" class="stepper-val num-b">3</span>
-            <button class="stepper-btn" data-action="step-b" data-value="1">+</button>
-          </div>
+          <div id="stepper-b" class="stepper-row"></div>
         </div>
       </section>
 
-      <!-- Visual manipulative display area (ten-frames / array / buckets) -->
+      <!-- Visual manipulative (ten-frames, base-ten blocks, place value, array, area model, sharing) -->
       <section id="manipulative-card" class="card"></section>
 
       <!-- Vector number line -->
@@ -160,6 +153,7 @@
         <div class="number-line">
           <div class="number-line-track">
             <div id="vector-segment" class="vector-fill"></div>
+            <span id="vector-marker" class="vector-marker"></span>
           </div>
           <div id="vector-ticks" class="ticks-container"></div>
         </div>
@@ -168,7 +162,8 @@
 
     <!-- VIEW 2: MYSTERY QUEST -->
     <div id="view-quest" class="view" hidden>
-      <section class="card">
+      <div class="quest-layout">
+      <section class="card quest-card">
         <div class="quest-toolbar">
           <div class="filter-pills-row">
             <span class="toolbar-label">OPERATIONS:</span>
@@ -228,6 +223,16 @@
           <p id="quest-guide-text" class="clue-text"></p>
         </div>
       </section>
+
+      <!-- Climbing meter: difficulty from 1 (early 2nd grade, bottom) to 5 (5th grade, top) -->
+      <div class="level-rail" role="group" aria-label="Level">
+        <button class="level-step" data-action="quest-level" data-value="5" aria-label="Level 5"><span class="level-bars"><i></i><i></i><i></i><i></i><i></i></span><span class="level-num">5</span></button>
+        <button class="level-step" data-action="quest-level" data-value="4" aria-label="Level 4"><span class="level-bars"><i></i><i></i><i></i><i></i></span><span class="level-num">4</span></button>
+        <button class="level-step" data-action="quest-level" data-value="3" aria-label="Level 3"><span class="level-bars"><i></i><i></i><i></i></span><span class="level-num">3</span></button>
+        <button class="level-step" data-action="quest-level" data-value="2" aria-label="Level 2"><span class="level-bars"><i></i><i></i></span><span class="level-num">2</span></button>
+        <button class="level-step" data-action="quest-level" data-value="1" aria-label="Level 1"><span class="level-bars"><i></i></span><span class="level-num">1</span></button>
+      </div>
+      </div>
     </div>
   </main>
 

@@ -1,11 +1,10 @@
 // Mystery Quest: generate a problem with one hidden number, check the answer.
 
 import { state, OP_LABEL } from './state.js';
+import { makeProblem, levelInfo, fmt } from './levels.js';
 import { playChime, playSuccessChord } from './audio.js';
 
 const $ = (id) => document.getElementById(id);
-
-const randInt = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
 
 export function toggleQuestFilter(op) {
   let f = state.quest.filters;
@@ -27,36 +26,7 @@ export function toggleQuestFilter(op) {
 export function generateNewQuest() {
   const pool = state.quest.filters.length ? state.quest.filters : ['+'];
   const op = pool[Math.floor(Math.random() * pool.length)];
-  let qa, qb, ans;
-
-  if (op === '+') {
-    qa = randInt(2, 9);
-    qb = randInt(2, 8);
-    ans = qa + qb;
-  } else if (op === '-') {
-    ans = randInt(1, 8);
-    qb = randInt(2, 7);
-    qa = ans + qb;
-  } else if (op === '×') {
-    qa = randInt(2, 6);
-    qb = randInt(2, 6);
-    ans = qa * qb;
-  } else {
-    qb = randInt(2, 5);
-    // Keep the total at 20 or less so the Lab can show it
-    ans = randInt(1, Math.min(5, Math.floor(20 / qb)));
-    qa = ans * qb;
-  }
-
-  const hideAns = Math.random() > 0.35;
-  state.quest.problem = {
-    a: qa,
-    b: qb,
-    op,
-    target: ans,
-    missing: hideAns ? 'result' : 'b',
-    expected: hideAns ? ans : qb
-  };
+  state.quest.problem = makeProblem(op, state.quest.level);
   state.quest.status = 'playing';
   state.quest.entry = '';
   state.quest.replaceOnType = false;
@@ -64,35 +34,58 @@ export function generateNewQuest() {
   renderQuest();
 }
 
+// Pick a level on the climbing meter. A quest in progress is swapped for one
+// at the new level; a solved one stays until "Next Quest".
+export function setLevel(level) {
+  const quest = state.quest;
+  quest.level = levelInfo(level).id;
+  playChime(quest.level * 2);
+  if (quest.status === 'correct') renderQuest();
+  else generateNewQuest();
+}
+
+// Equations get smaller type as the numbers get longer
+const sizeFor = (text) => (text.length > 16 ? 'l' : text.length > 11 ? 'm' : '');
+
 export function renderQuest() {
-  const { filters, problem: q, status, entry } = state.quest;
+  const { filters, problem: q, status, entry, level } = state.quest;
 
   document.querySelectorAll('.filter-pill').forEach(pill => {
     pill.classList.toggle('active', filters.includes(pill.dataset.value));
   });
 
+  // Climbing meter: the chosen level is solid, the steps below it tinted
+  document.querySelectorAll('.level-step').forEach(stepEl => {
+    const n = Number(stepEl.dataset.value);
+    stepEl.classList.toggle('active', n === level);
+    stepEl.classList.toggle('below', n < level);
+  });
+
   if (!q) return;
 
-  $('quest-num-a').textContent = q.a;
+  $('quest-num-a').textContent = fmt(q.a);
   $('quest-op-badge').textContent = OP_LABEL[q.op];
+  const shown = q.missing === 'b' ? [q.a, q.target] : [q.a, q.b];
+  document.querySelector('.quest-equation').dataset.size =
+    sizeFor(`${shown.map(fmt).join(' ')} ${'0'.repeat(levelInfo(level).maxDigits)}`);
 
   // The mystery box shows what Felix has typed on the number pad, in the
   // color of the number it stands for (amber for B, green for the answer)
   const role = q.missing === 'b' ? 'role-b' : 'role-target';
   const fill = status === 'correct' ? 'correct' : entry ? 'filled' : '';
-  const box = `<span class="mystery-box ${role} ${fill}">${entry || '?'}</span>`;
+  const box = `<span class="mystery-box ${role} ${fill}">${entry ? fmt(entry) : '?'}</span>`;
 
   if (q.missing === 'b') {
     $('quest-slot-b').innerHTML = box;
-    $('quest-slot-result').innerHTML = `<span class="num-target">${q.target}</span>`;
+    $('quest-slot-result').innerHTML = `<span class="num-target">${fmt(q.target)}</span>`;
   } else {
-    $('quest-slot-b').innerHTML = `<span class="num-b">${q.b}</span>`;
+    $('quest-slot-b').innerHTML = `<span class="num-b">${fmt(q.b)}</span>`;
     $('quest-slot-result').innerHTML = box;
   }
 
-  const a = `<strong class="num-a">${q.a}</strong>`;
-  const target = `<strong class="num-target">${q.target}</strong>`;
-  const b = (mystery) => `<strong class="num-b">${q.missing === 'b' ? mystery : q.b}</strong>`;
+  const a = `<strong class="num-a">${fmt(q.a)}</strong>`;
+  const target = `<strong class="num-target">${fmt(q.target)}</strong>`;
+  const b = (mystery) => `<strong class="num-b">${q.missing === 'b' ? mystery : fmt(q.b)}</strong>`;
   const guide = $('quest-guide-text');
   if (q.missing === 'result') {
     // The answer is the mystery here, so the guide asks for it instead of naming it
@@ -130,28 +123,25 @@ export function renderQuestBanner(show) {
 
   const q = state.quest.problem;
   const mystery = '<span class="mini-mystery">?</span>';
-  const b = q.missing === 'b' ? mystery : `<span class="num-b">${q.b}</span>`;
-  const result = q.missing === 'result' ? mystery : `<span class="num-target">${q.target}</span>`;
+  const b = q.missing === 'b' ? mystery : `<span class="num-b">${fmt(q.b)}</span>`;
+  const result = q.missing === 'result' ? mystery : `<span class="num-target">${fmt(q.target)}</span>`;
   $('banner-equation').innerHTML =
-    `<span class="num-a">${q.a}</span><span class="op-symbol">${OP_LABEL[q.op]}</span>${b}<span class="equals">=</span>${result}`;
+    `<span class="num-a">${fmt(q.a)}</span><span class="op-symbol">${OP_LABEL[q.op]}</span>${b}<span class="equals">=</span>${result}`;
 
   const amber = (text) => `<strong class="num-b">${text}</strong>`;
   const green = (text) => `<strong class="num-target">${text}</strong>`;
   let hint;
   if (q.missing === 'b') {
     hint = q.op === '÷'
-      ? `Change the ${amber('groups')} until each group gets ${green(q.target)}.`
-      : `Change the ${amber('second number')} until you get ${green(q.target)}.`;
+      ? `Change the ${amber('groups')} until each group gets ${green(fmt(q.target))}.`
+      : `Change the ${amber('second number')} until you get ${green(fmt(q.target))}.`;
   } else {
     hint = q.op === '÷'
-      ? `Make ${amber(`${q.b} groups`)}, then look at the answer.`
-      : `Make the ${amber('second number')} ${amber(q.b)}, then look at the answer.`;
+      ? `Make ${amber(`${fmt(q.b)} groups`)}, then look at the answer.`
+      : `Make the ${amber('second number')} ${amber(fmt(q.b))}, then look at the answer.`;
   }
   $('banner-hint').innerHTML = hint;
 }
-
-// Every quest answer is 36 or less, so two digits is enough
-const MAX_DIGITS = 2;
 
 // Number pad: key is '0'–'9', 'back' or 'solve'
 export function pressKey(key) {
@@ -171,7 +161,8 @@ export function pressKey(key) {
   } else {
     if (quest.replaceOnType || quest.entry === '0') quest.entry = '';
     quest.replaceOnType = false;
-    if (quest.entry.length >= MAX_DIGITS) return;
+    // As many digits as the level's biggest answer (never the length of this one)
+    if (quest.entry.length >= levelInfo(quest.level).maxDigits) return;
     quest.entry += key;
     playChime(Number(key));
   }

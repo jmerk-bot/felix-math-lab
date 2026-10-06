@@ -4,7 +4,7 @@
 import { state, loadState, saveState, SPELL_EVERY } from './state.js';
 import { playChime } from './audio.js';
 import { clampLab, renderLab, setLabOp, stepA, stepB } from './lab.js';
-import { generateNewQuest, pressKey, renderQuest, renderQuestBanner, toggleQuestFilter } from './quest.js';
+import { generateNewQuest, pressKey, renderQuest, renderQuestBanner, setLevel, toggleQuestFilter } from './quest.js';
 import { buildKeyboard, pressTile, renderSpell, sayWord, startWord, toggleLevel } from './spell.js';
 import { initPwa } from './pwa.js';
 
@@ -98,6 +98,7 @@ const actions = {
   'step-a': (value) => stepA(Number(value)),
   'step-b': (value) => stepB(Number(value)),
   'quest-filter': (value) => toggleQuestFilter(value),
+  'quest-level': (value) => { setLevel(Number(value)); clampLab(); renderLab(); },
   'quest-skip': () => nextQuest(),
   'quest-next': () => nextQuest(),
   'quest-to-lab': () => sendQuestToLab(),

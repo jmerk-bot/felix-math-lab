@@ -567,7 +567,7 @@ header {
 
 .number-line {
   position: relative;
-  padding: 4px 6px;
+  padding: 18px 6px 4px;
 }
 
 .number-line-track {
@@ -876,6 +876,424 @@ header {
 .clue-text {
   font-size: 13px;
   color: var(--text-soft);
+}
+
+/* ---------- Math: wider layout for the level meter and big-number pictures ---------- */
+
+body[data-mode="lab"] header,
+body[data-mode="lab"] .app-container,
+body[data-mode="quest"] header,
+body[data-mode="quest"] .app-container {
+  max-width: 740px;
+}
+
+/* Long numbers: smaller equation type */
+.equation-display[data-size="m"] { font-size: 28px; }
+.equation-display[data-size="l"] { font-size: 22px; gap: 8px; }
+.equation-display[data-size="l"] .op-symbol { font-size: 20px; }
+.quest-equation[data-size="m"] { font-size: 34px; gap: 10px; }
+.quest-equation[data-size="l"] { font-size: 26px; gap: 8px; }
+.quest-equation[data-size="m"] .mystery-box { height: 54px; font-size: 32px; }
+.quest-equation[data-size="l"] .mystery-box { height: 46px; font-size: 26px; }
+
+/* ---------- Mystery Quest: climbing level meter ---------- */
+
+.quest-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 88px;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.level-rail {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45);
+}
+
+.level-step {
+  flex: 1;
+  min-height: 64px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.level-step.below {
+  background: rgba(79, 70, 229, 0.22);
+  border-color: rgba(129, 140, 248, 0.45);
+  color: #a5b4fc;
+}
+
+.level-step.active {
+  background: var(--accent-indigo);
+  border-color: var(--accent-indigo-light);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(79, 70, 229, 0.5);
+}
+
+.level-step:active {
+  transform: scale(0.96);
+}
+
+.level-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 30px;
+}
+
+.level-bars i {
+  width: 7px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+.level-bars i:nth-child(1) { height: 8px; }
+.level-bars i:nth-child(2) { height: 13px; }
+.level-bars i:nth-child(3) { height: 18px; }
+.level-bars i:nth-child(4) { height: 24px; }
+.level-bars i:nth-child(5) { height: 30px; }
+
+.level-num {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+/* ---------- Lab: one ▲▼ column per place value ---------- */
+
+.digit-stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* With digit columns the label sits above, and the columns are centered */
+.control-box:has(.digit-stepper) {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.control-box:has(.digit-stepper) .stepper-row {
+  justify-content: center;
+}
+
+.digit-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.digit-btn {
+  width: 44px;
+  height: 40px;
+  border-radius: 10px;
+  background: #334155;
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.digit-btn:active {
+  transform: scale(0.94);
+}
+
+.digit-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+.digit {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.15;
+  min-width: 28px;
+  text-align: center;
+}
+
+.digit.leading {
+  color: #475569;
+}
+
+.digit-place {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.digit-comma {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-muted);
+  margin: 0 -2px;
+}
+
+/* ---------- Lab: base-ten blocks ---------- */
+
+.num-take { color: var(--accent-rose); }
+
+.b10-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.b10-legend > span {
+  margin-left: 8px;
+  background: #64748b;
+}
+
+.b10-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #1e293b;
+}
+
+.b10-row:last-child {
+  border-bottom: none;
+}
+
+.b10-label {
+  min-width: 86px;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.b10-blocks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.b10-flat,
+.b10-rod,
+.b10-one {
+  display: inline-block;
+  border-radius: 2px;
+  background-color: currentColor;
+}
+
+.b10-flat {
+  width: 40px;
+  height: 40px;
+  background-image:
+    linear-gradient(to right, rgba(2, 6, 23, 0.35) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(2, 6, 23, 0.35) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+.b10-rod {
+  width: 8px;
+  height: 40px;
+  background-image: linear-gradient(to bottom, rgba(2, 6, 23, 0.35) 1px, transparent 1px);
+  background-size: 8px 4px;
+}
+
+.b10-one {
+  width: 8px;
+  height: 8px;
+}
+
+.b10-flat.mini { width: 14px; height: 14px; background-size: 2px 2px; }
+.b10-rod.mini { width: 4px; height: 14px; background-size: 4px 2px; }
+
+.b10-ones {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 8px);
+  gap: 2px;
+}
+
+.b10-zero {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.kind-a { color: var(--accent-blue); }
+.kind-b { color: var(--accent-amber); }
+.kind-result { color: var(--accent-emerald); }
+
+.kind-take .b10-flat,
+.kind-take .b10-rod,
+.kind-take .b10-one {
+  background: transparent;
+  border: 2px dashed var(--accent-rose);
+}
+
+/* ---------- Lab: place-value chart ---------- */
+
+.pv-chart {
+  display: grid;
+  gap: 4px 6px;
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.pv-head {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.pv-mark {
+  min-height: 16px;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.pv-mark.carry { color: var(--accent-amber); }
+.pv-mark.regroup { color: var(--accent-rose); }
+
+.pv-cell {
+  min-height: 46px;
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.6);
+  font-size: 30px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pv-op {
+  font-size: 26px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.pv-line {
+  grid-column: 1 / -1;
+  height: 2px;
+  background: #475569;
+}
+
+/* ---------- Lab: arrays to 10 × 10, area model, big-chunk sharing ---------- */
+
+.matrix-grid.small {
+  gap: 5px;
+}
+
+.matrix-grid.small .matrix-cell {
+  width: 30px;
+  height: 30px;
+  font-size: 10px;
+}
+
+.area-grid {
+  display: grid;
+  gap: 4px;
+}
+
+.area-head {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.area-side {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 6px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.area-cell {
+  border: 2px solid #6366f1;
+  border-radius: 8px;
+  background: rgba(99, 102, 241, 0.22);
+  color: #c7d2fe;
+  font-size: 18px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.area-sum {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.chunk-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 16px;
+  align-items: center;
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.chunk-left {
+  text-align: right;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.chunk-take {
+  color: var(--text-soft);
+}
+
+.chunk-q {
+  color: #a5b4fc;
+}
+
+/* Number line: dot (and label) at the result */
+.vector-marker {
+  position: absolute;
+  top: -30px;
+  transform: translateX(-50%);
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  white-space: nowrap;
+  transition: left 0.25s ease-out;
+}
+
+.vector-marker::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 26px;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--accent-indigo-light);
+  box-sizing: border-box;
 }
 
 /* ---------- Header: home button ---------- */
