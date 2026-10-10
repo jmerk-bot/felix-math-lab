@@ -95,19 +95,21 @@ export function renderLab() {
   $('stepper-a').innerHTML = stepperHtml('a', a, lim.aMax);
   $('stepper-b').innerHTML = stepperHtml('b', b, lim.bCap);
 
-  // Active manipulative
-  const card = $('manipulative-card');
-  if (op === '+' || op === '-') {
-    if (Math.max(a, b, result) <= 20) card.innerHTML = tenFramesHtml(a, b, op, result);
-    else if (Math.max(a, b, result) < 1000) card.innerHTML = blocksHtml(a, b, op, result);
-    else card.innerHTML = placeValueHtml(a, b, op, result);
-  } else if (op === '×') {
-    card.innerHTML = a <= 10 && b <= 10 ? arrayHtml(a, b) : areaModelHtml(a, b);
-  } else {
-    card.innerHTML = a <= 100 && b <= 10 ? sharingHtml(a, b, remainder) : chunksHtml(a, b);
-  }
-
+  $('manipulative-card').innerHTML = manipulativeHtml(a, b, op);
   renderNumberLine(a, b, op, result);
+}
+
+// The picture for a op b, chosen by the size of the numbers. Also used by the
+// rocket journey's mission briefings.
+export function manipulativeHtml(a, b, op) {
+  const result = compute(a, b, op);
+  if (op === '+' || op === '-') {
+    if (Math.max(a, b, result) <= 20) return tenFramesHtml(a, b, op, result);
+    if (Math.max(a, b, result) < 1000) return blocksHtml(a, b, op, result);
+    return placeValueHtml(a, b, op, result);
+  }
+  if (op === '×') return a <= 10 && b <= 10 ? arrayHtml(a, b) : areaModelHtml(a, b);
+  return a <= 100 && b <= 10 ? sharingHtml(a, b, b > 0 ? a % b : 0) : chunksHtml(a, b);
 }
 
 // ---------- Steppers ----------

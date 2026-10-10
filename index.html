@@ -42,6 +42,12 @@
   </header>
 
   <main class="app-container">
+    <!-- Rocket journey: a destination is finished, so Dad's keys unlock the next one -->
+    <div id="journey-banner" class="journey-banner" hidden>
+      <span class="journey-banner-text">Ready to move on! Ask Dad for the keys to the rocket.</span>
+      <button class="banner-btn keys-btn" data-action="keys-open">🔑 Keys</button>
+    </div>
+
     <!-- HOME: pick Words or Math -->
     <div id="view-home" class="view home">
       <button class="home-card home-words" data-action="pick-words">
@@ -56,10 +62,13 @@
         </span>
         <span class="home-label">Math</span>
       </button>
+      <!-- The rocket in progress and the hangar (filled by renderJourney) -->
+      <button id="home-hangar" class="home-hangar" data-action="open-hangar" aria-label="Hangar" hidden></button>
     </div>
 
     <!-- WORDS: spelling -->
     <div id="view-spell" class="view" hidden>
+      <div class="play-layout">
       <section class="card spell-card">
         <div class="quest-toolbar spell-toolbar">
           <div id="spell-levels" class="filter-pills-row">
@@ -95,6 +104,9 @@
           </div>
         </div>
       </section>
+      <!-- Rocket being built: blueprint + 4 lights toward the next piece -->
+      <div class="build-rail" hidden></div>
+      </div>
     </div>
 
     <!-- Active quest reminder, shown inside the Lab -->
@@ -169,15 +181,17 @@
 
     <!-- VIEW 2: MYSTERY QUEST -->
     <div id="view-quest" class="view" hidden>
+      <div class="play-layout">
       <section class="card quest-card">
         <div class="quest-toolbar">
-          <div class="filter-pills-row">
+          <div id="quest-filters" class="filter-pills-row">
             <span class="toolbar-label">OPERATIONS:</span>
             <button class="filter-pill active" data-action="quest-filter" data-value="+">+</button>
             <button class="filter-pill active" data-action="quest-filter" data-value="-">−</button>
             <button class="filter-pill active" data-action="quest-filter" data-value="×">×</button>
             <button class="filter-pill active" data-action="quest-filter" data-value="÷">÷</button>
           </div>
+          <span id="quest-break" class="bonus-chip" hidden>⭐ Math break</span>
           <div class="toolbar-right">
             <span id="quest-tag-status" class="quest-tag" hidden></span>
             <button class="skip-btn" data-action="quest-skip">Skip ↻</button>
@@ -229,9 +243,22 @@
           <p id="quest-guide-text" class="clue-text"></p>
         </div>
       </section>
+      <div class="build-rail" hidden></div>
+      </div>
 
     </div>
+
+    <!-- HANGAR: every launched rocket, by destination (filled by renderHangar) -->
+    <div id="view-hangar" class="view" hidden>
+      <section class="card hangar-card">
+        <div id="hangar-list"></div>
+        <button id="hangar-continue" class="next-quest-btn" data-action="hangar-continue" hidden>Next rocket ➔</button>
+      </section>
+    </div>
   </main>
+
+  <!-- Rocket journey overlays: paint job, launch, briefing, keys (js/journey-ui.js) -->
+  <div id="journey-overlay" class="journey-overlay" hidden></div>
 
   <!-- GROWN-UP SETTINGS (js/settings.js) -->
   <div id="settings" class="settings-overlay" hidden>
@@ -241,8 +268,13 @@
         <button class="settings-close" data-action="settings-close" aria-label="Close settings">✕</button>
       </div>
       <div class="settings-section">
+        <h3>Mystery Quest</h3>
+        <p class="settings-help">The rocket journey leads through math concepts in order. Classic quests use the level and the operation buttons instead.</p>
+        <div id="settings-journey" class="settings-levels settings-pair"></div>
+      </div>
+      <div class="settings-section">
         <h3>Math level</h3>
-        <p class="settings-help">Sets how hard Mystery Quest is and how big the Lab's numbers go.</p>
+        <p class="settings-help">Sets how hard Mystery Quest is and how big the Lab's numbers go. In the rocket journey it's the planet Felix is on; finishing a planet unlocks the next with Dad's keys.</p>
         <div id="settings-levels" class="settings-levels"></div>
       </div>
       <button class="next-quest-btn settings-done" data-action="settings-close">Done</button>

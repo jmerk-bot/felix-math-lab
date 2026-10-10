@@ -3,6 +3,7 @@
 A visual, hands-on learning app with two sides, picked on the home screen:
 
 - **Math:** a Lab for exploring +, −, × and ÷ with pictures (ten-frames, base-ten blocks, place-value charts, arrays, area models, equal sharing and a number line), plus "Mystery Quest" problems with one hidden number at five levels, from early 2nd grade to 5th grade.
+- **Rocket journey:** every 3 math quests plus 1 word (or 3 words plus 1 math quest) builds a rocket piece. Finished rockets get a paint job, blast off and join the hangar. The rockets follow 23 missions from the Moon to deep space, one math concept each; finishing a planet asks a grown-up for the "keys" to the next.
 - **Words:** phonics spelling. Hear a word, see its picture, and build it from letter tiles in sound boxes (one box per sound, with digraphs like "sh" as single tiles). A spelling word also comes up after every few math quests.
 
 It's a Progressive Web App (PWA). Install it once on a tablet and it opens full-screen from the home screen, works offline, and updates itself whenever a new version is pushed.
@@ -38,6 +39,11 @@ Then open http://localhost:8765. The footer shows `dev` locally.
 | --- | --- |
 | `index.html` | Page markup. Buttons use `data-action` / `data-value` instead of inline handlers. |
 | `css/styles.css` | All styles. Colors are CSS variables at the top. |
+| `js/missions.js` | Rocket journey path: destinations and missions, each with its own quest maker. |
+| `js/rockets.js` | Rocket kit: five rocket families drawn as SVG, with blueprint outlines and paint colors. |
+| `js/journey.js` | Rocket journey logic: next quest, flights and pieces, moving on, the keys. |
+| `js/journey-ui.js` | Build rail, banner, hangar, paint job, launch, briefings and the keys screen. |
+| `js/voice.js` | Spoken lines for the journey (countdown, piece names, mission briefings). |
 | `js/settings.js` | Grown-up settings (hold the gear on Home): math level. |
 | `js/main.js` | Entry point: wires buttons, moves between Home, Words and Math (and the word breaks), boots the app. |
 | `js/lab.js` | Explore Lab: steppers, and the pictures for each number size (ten-frames to area models), number line. |
@@ -59,7 +65,7 @@ Then open http://localhost:8765. The footer shows `dev` locally.
 
 ## Grown-up settings
 
-Hold the gear (top right of the Home screen) for 3 seconds to open the settings. A quick tap does nothing, so the level can't be changed by accident. The math level (early 2nd grade to 5th grade) is set there.
+Hold the gear (top right of the Home screen) for 3 seconds to open the settings. A quick tap does nothing, so the level can't be changed by accident. The math level (early 2nd grade to 5th grade, which is also the journey's planet) is set there, and the rocket journey can be switched off for classic quests.
 
 ## Making changes
 

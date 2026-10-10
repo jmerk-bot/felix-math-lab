@@ -2,7 +2,9 @@
 
 import { state, OP_LABEL } from './state.js';
 import { makeProblem, levelInfo, fmt } from './levels.js';
-import { playChime, playSuccessChord } from './audio.js';
+import { playChime, playSuccessChord, playClips } from './audio.js';
+import { journeyOn, nextJourneyProblem, recordMath } from './journey.js';
+import { renderJourney, pieceClip } from './journey-ui.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -23,11 +25,18 @@ export function toggleQuestFilter(op) {
   }
 }
 
+// In the rocket journey, quests come from the current mission; otherwise
+// (classic mode) from the level and the operation buttons.
 export function generateNewQuest() {
-  const pool = state.quest.filters.length ? state.quest.filters : ['+'];
-  const op = pool[Math.floor(Math.random() * pool.length)];
-  state.quest.problem = makeProblem(op, state.quest.level);
+  if (journeyOn()) {
+    state.quest.problem = nextJourneyProblem();
+  } else {
+    const pool = state.quest.filters.length ? state.quest.filters : ['+'];
+    const op = pool[Math.floor(Math.random() * pool.length)];
+    state.quest.problem = makeProblem(op, state.quest.level);
+  }
   state.quest.status = 'playing';
+  state.quest.misses = 0;
   state.quest.entry = '';
   state.quest.replaceOnType = false;
 
@@ -53,6 +62,9 @@ export function renderQuest() {
   document.querySelectorAll('.filter-pill').forEach(pill => {
     pill.classList.toggle('active', filters.includes(pill.dataset.value));
   });
+  // Missions choose the operation, so the operation buttons are classic-mode only
+  $('quest-filters').hidden = journeyOn();
+  $('quest-break').hidden = state.quest.returnTo !== 'spell';
 
   if (!q) return;
 
@@ -168,10 +180,17 @@ function submitQuestAnswer() {
 
   if (parseInt(quest.entry, 10) === quest.problem.expected) {
     quest.status = 'correct';
-    quest.solvedSinceSpelling++;
     playSuccessChord();
+    if (journeyOn()) {
+      const award = recordMath(quest.problem, quest.misses);
+      renderJourney({ snap: award?.part });
+      if (award) playClips(pieceClip(award));
+    } else {
+      quest.solvedSinceSpelling++;
+    }
     renderQuest();
   } else {
+    quest.misses++;
     quest.status = 'retry';
     quest.replaceOnType = true; // keep the guess on screen until the next digit
     playChime(1);

@@ -10,6 +10,7 @@
 
 import { APP_VERSION } from './version.js';
 import { ALL_AUDIO } from './words.js';
+import { VOICE_AUDIO } from './voice.js';
 
 const isDev = APP_VERSION.startsWith('__');
 const CHECK_EVERY_MS = 60 * 1000;
@@ -62,7 +63,7 @@ export function initPwa() {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
     // Ask the worker to save all spelling audio for offline use
     navigator.serviceWorker.ready.then((reg) => {
-      const urls = ALL_AUDIO.map((path) => new URL(path, location.href).href);
+      const urls = [...ALL_AUDIO, ...VOICE_AUDIO].map((path) => new URL(path, location.href).href);
       reg.active?.postMessage({ type: 'precache', urls });
     }).catch(() => {});
   }

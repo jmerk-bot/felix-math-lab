@@ -4,6 +4,8 @@
 import { state } from './state.js';
 import { TILES, LEVELS, WORDS, PHRASES, tileKind, wordAudio, phraseAudio } from './words.js';
 import { playTick, playSuccessChord, playClips, preloadClips } from './audio.js';
+import { journeyOn, recordWord } from './journey.js';
+import { renderJourney, pieceClip } from './journey-ui.js';
 
 const $ = (id) => document.getElementById(id);
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
@@ -112,10 +114,16 @@ function checkSpelling() {
 
   if (spell.locked.every(Boolean)) {
     spell.status = 'correct';
-    state.quest.solvedSinceSpelling = 0;
     if (spell.attempts >= 2) spell.queue.splice(2, 0, spell.word); // practice it again soon
+    let award = null;
+    if (journeyOn()) {
+      award = recordWord();
+      renderJourney({ snap: award?.part });
+    } else {
+      state.quest.solvedSinceSpelling = 0;
+    }
     playSuccessChord();
-    playClips(phraseAudio(pick(PHRASES.praise).id), wordAudio(spell.word.word));
+    playClips(phraseAudio(pick(PHRASES.praise).id), wordAudio(spell.word.word), pieceClip(award));
     renderSpell();
     $('spell-pic').classList.add('celebrate');
   } else {

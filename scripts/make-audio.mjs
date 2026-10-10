@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// Records the spelling words and spoken feedback from js/words.js with the
-// macOS `say` voice, as small AAC files in audio/words and audio/phrases.
+// Records the spelling words and spoken feedback (js/words.js) and the rocket
+// journey's lines (js/voice.js) with the macOS `say` voice, as small AAC files
+// in audio/words, audio/phrases and audio/voice.
 //
 //   node scripts/make-audio.mjs            record anything missing
 //   node scripts/make-audio.mjs --force    re-record everything
@@ -15,9 +16,10 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { WORDS, PHRASES, wordAudio, phraseAudio } from '../js/words.js';
+import { VOICE, voiceAudio } from '../js/voice.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const VOICE = 'Samantha';
+const SPEAKER = 'Samantha';
 const WORD_RATE = 130; // words per minute; slow and clear for single words
 const PHRASE_RATE = 175;
 
@@ -35,7 +37,7 @@ function record(text, rate, outPath) {
   const out = join(ROOT, outPath);
   mkdirSync(dirname(out), { recursive: true });
   const aiff = join(tmp, 'clip.aiff');
-  execFileSync('say', ['-v', VOICE, '-r', String(rate), '-o', aiff, text]);
+  execFileSync('say', ['-v', SPEAKER, '-r', String(rate), '-o', aiff, text]);
   execFileSync('afconvert', ['-f', 'm4af', '-d', 'aac', '-b', '32000', aiff, out]);
   made++;
   console.log(`recorded ${outPath}  "${text}"`);
@@ -51,6 +53,10 @@ try {
     for (const phrase of Object.values(PHRASES).flat()) {
       const path = phraseAudio(phrase.id);
       if (force || !existsSync(join(ROOT, path))) record(phrase.text, PHRASE_RATE, path);
+    }
+    for (const line of VOICE) {
+      const path = voiceAudio(line.id);
+      if (force || !existsSync(join(ROOT, path))) record(line.text, PHRASE_RATE, path);
     }
   }
   console.log(made ? `\n${made} clip(s) recorded.` : 'Nothing to record. Use --force to re-record.');

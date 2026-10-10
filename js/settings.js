@@ -4,6 +4,7 @@
 
 import { state } from './state.js';
 import { LEVELS } from './levels.js';
+import { DESTINATIONS } from './missions.js';
 
 const $ = (id) => document.getElementById(id);
 const HOLD_MS = 3000;
@@ -41,10 +42,14 @@ export function closeSettings() {
 }
 
 export function renderSettings() {
+  const mode = state.journey.on ? 'on' : 'off';
+  $('settings-journey').innerHTML = [['on', '🚀 Rocket journey'], ['off', 'Classic quests']].map(([value, label]) => `
+    <button class="settings-level ${value === mode ? 'active' : ''}" data-action="settings-journey" data-value="${value}">${label}</button>
+  `).join('');
   $('settings-levels').innerHTML = LEVELS.map((l) => `
     <button class="settings-level ${l.id === state.quest.level ? 'active' : ''}" data-action="settings-level" data-value="${l.id}">
       <span class="settings-level-num">${l.id}</span>
-      <span class="settings-level-grade">${l.grade}</span>
+      <span class="settings-level-grade">${l.grade} · ${DESTINATIONS[l.id - 1].short}</span>
     </button>
   `).join('');
 }

@@ -58,6 +58,36 @@ export function playTick() {
   playTone(659.25, 0, 0.08);
 }
 
+// Rocket liftoff: filtered noise that swells, opens up, and fades away
+export function playRumble(seconds = 3) {
+  try {
+    const ac = ctx();
+    const length = Math.floor(ac.sampleRate * seconds);
+    const buffer = ac.createBuffer(1, length, ac.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
+
+    const noise = ac.createBufferSource();
+    noise.buffer = buffer;
+    const filter = ac.createBiquadFilter();
+    filter.type = 'lowpass';
+    const gain = ac.createGain();
+    const t = ac.currentTime;
+    filter.frequency.setValueAtTime(140, t);
+    filter.frequency.exponentialRampToValueAtTime(900, t + seconds * 0.6);
+    gain.gain.setValueAtTime(0.001, t);
+    gain.gain.exponentialRampToValueAtTime(0.35, t + 0.5);
+    gain.gain.setValueAtTime(0.35, t + seconds * 0.5);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + seconds);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(ac.destination);
+    noise.start(t);
+    noise.stop(t + seconds);
+  } catch (e) {}
+}
+
 // ---------- Speech clips ----------
 // Clips are fetched and decoded with Web Audio rather than played through an
 // <audio> element, which avoids range requests the service worker can't cache.
@@ -98,7 +128,7 @@ export function stopClips() {
 export async function playClips(...urls) {
   stopClips();
   const mine = sequence;
-  for (const url of urls) {
+  for (const url of urls.filter(Boolean)) {
     try {
       const buffer = await loadClip(url);
       if (mine !== sequence) return;
