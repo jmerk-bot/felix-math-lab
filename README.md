@@ -38,6 +38,7 @@ Then open http://localhost:8765. The footer shows `dev` locally.
 | --- | --- |
 | `index.html` | Page markup. Buttons use `data-action` / `data-value` instead of inline handlers. |
 | `css/styles.css` | All styles. Colors are CSS variables at the top. |
+| `js/settings.js` | Grown-up settings (hold the gear on Home): math level. |
 | `js/main.js` | Entry point: wires buttons, moves between Home, Words and Math (and the word breaks), boots the app. |
 | `js/lab.js` | Explore Lab: steppers, and the pictures for each number size (ten-frames to area models), number line. |
 | `js/quest.js` | Mystery Quest: rendering, level meter, number pad, answer checking. |
@@ -55,6 +56,10 @@ Then open http://localhost:8765. The footer shows `dev` locally.
 | `icons/` | `icon.svg` / `icon-maskable.svg` sources plus rendered PNGs. |
 | `scripts/make-icons.sh` | Re-renders the PNG icons from the SVGs (needs Google Chrome). |
 | `scripts/make-audio.mjs` | Records spelling words and phrases with the macOS voice (`node scripts/make-audio.mjs`). |
+
+## Grown-up settings
+
+Hold the gear (top right of the Home screen) for 3 seconds to open the settings. A quick tap does nothing, so the level can't be changed by accident. The math level (early 2nd grade to 5th grade) is set there.
 
 ## Making changes
 

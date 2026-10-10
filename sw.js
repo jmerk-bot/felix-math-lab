@@ -28,6 +28,7 @@ const APP_SHELL = [
   './js/spell.js',
   './js/words.js',
   './js/levels.js',
+  './js/settings.js',
   './fonts/atkinson-hyperlegible-next-latin.woff2',
   './manifest.webmanifest',
   './icons/icon-192.png',

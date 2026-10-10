@@ -28,6 +28,13 @@
       <div class="brand-icon">F</div>
       <h1 id="app-title">Felix's Lab</h1>
     </div>
+    <!-- Grown-up settings: hold for 3 seconds (a tap does nothing) -->
+    <button id="settings-btn" class="settings-btn" aria-label="Grown-up settings (hold for 3 seconds)">
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
     <div id="math-tabs" class="mode-toggle" hidden>
       <button id="tab-lab" class="mode-btn active" data-action="mode" data-value="lab">Explore</button>
       <button id="tab-quest" class="mode-btn" data-action="mode" data-value="quest">Mystery Quest 🎯</button>
@@ -162,7 +169,6 @@
 
     <!-- VIEW 2: MYSTERY QUEST -->
     <div id="view-quest" class="view" hidden>
-      <div class="quest-layout">
       <section class="card quest-card">
         <div class="quest-toolbar">
           <div class="filter-pills-row">
@@ -224,17 +230,24 @@
         </div>
       </section>
 
-      <!-- Climbing meter: difficulty from 1 (early 2nd grade, bottom) to 5 (5th grade, top) -->
-      <div class="level-rail" role="group" aria-label="Level">
-        <button class="level-step" data-action="quest-level" data-value="5" aria-label="Level 5"><span class="level-bars"><i></i><i></i><i></i><i></i><i></i></span><span class="level-num">5</span></button>
-        <button class="level-step" data-action="quest-level" data-value="4" aria-label="Level 4"><span class="level-bars"><i></i><i></i><i></i><i></i></span><span class="level-num">4</span></button>
-        <button class="level-step" data-action="quest-level" data-value="3" aria-label="Level 3"><span class="level-bars"><i></i><i></i><i></i></span><span class="level-num">3</span></button>
-        <button class="level-step" data-action="quest-level" data-value="2" aria-label="Level 2"><span class="level-bars"><i></i><i></i></span><span class="level-num">2</span></button>
-        <button class="level-step" data-action="quest-level" data-value="1" aria-label="Level 1"><span class="level-bars"><i></i></span><span class="level-num">1</span></button>
-      </div>
-      </div>
     </div>
   </main>
+
+  <!-- GROWN-UP SETTINGS (js/settings.js) -->
+  <div id="settings" class="settings-overlay" hidden>
+    <section class="card settings-card" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <div class="settings-head">
+        <h2 id="settings-title">Grown-up settings</h2>
+        <button class="settings-close" data-action="settings-close" aria-label="Close settings">✕</button>
+      </div>
+      <div class="settings-section">
+        <h3>Math level</h3>
+        <p class="settings-help">Sets how hard Mystery Quest is and how big the Lab's numbers go.</p>
+        <div id="settings-levels" class="settings-levels"></div>
+      </div>
+      <button class="next-quest-btn settings-done" data-action="settings-close">Done</button>
+    </section>
+  </div>
 
   <footer id="app-version" class="app-version"></footer>
 </body>

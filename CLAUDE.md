@@ -13,7 +13,7 @@ A sibling copy, `addy-math-lab` (in `~/code/addy-math-lab`), is also served from
 
 ## Levels (Mystery Quest and the Lab)
 
-- Five levels in `js/levels.js`: 1 early 2nd grade, 2 2nd, 3 3rd, 4 4th, 5 5th, whole numbers only. Felix picks one on the climbing meter to the right of Mystery Quest (`.level-rail`, top = 5). It's saved as `state.quest.level` (default 1).
+- Five levels in `js/levels.js`: 1 early 2nd grade, 2 2nd, 3 3rd, 4 4th, 5 5th, whole numbers only. The level is a **grown-up setting**, not something Felix changes: hold the gear on Home for 3 seconds to open settings (`js/settings.js`). A tap does nothing. (It used to be a meter beside the quest, but he kept setting it too high and stopped enjoying the game.) It's saved as `state.quest.level` (default 1).
 - Each level defines its quest generator (`numbers()`), its Lab limits (`lab: { op: [A max, B max] }`) and `maxDigits` for the number pad. Every quest a level makes must fit inside that level's Lab limits, so "Test in the Lab" can always show it. When changing a generator, re-check with a loop over thousands of `makeProblem()` calls.
 - The Lab picks its picture by number size: + and − ten-frames (to 20), base-ten blocks (to 999), place-value chart (above); × arrays (to 10 × 10), area model (above); ÷ sharing buckets (to 100 ÷ 10), sharing in big chunks / partial quotients (above). The number line's range grows to fit (20, 50, 100, 200, 500, …).
 - Lab controls: a simple − / + stepper when the range is 20 or less, otherwise one ▲▼ column per place value. A digit step that would go past the limit is ignored, not clamped.

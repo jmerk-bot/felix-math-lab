@@ -34,8 +34,8 @@ export function generateNewQuest() {
   renderQuest();
 }
 
-// Pick a level on the climbing meter. A quest in progress is swapped for one
-// at the new level; a solved one stays until "Next Quest".
+// Set the level (from grown-up settings). A quest in progress is swapped for
+// one at the new level; a solved one stays until "Next Quest".
 export function setLevel(level) {
   const quest = state.quest;
   quest.level = levelInfo(level).id;
@@ -52,13 +52,6 @@ export function renderQuest() {
 
   document.querySelectorAll('.filter-pill').forEach(pill => {
     pill.classList.toggle('active', filters.includes(pill.dataset.value));
-  });
-
-  // Climbing meter: the chosen level is solid, the steps below it tinted
-  document.querySelectorAll('.level-step').forEach(stepEl => {
-    const n = Number(stepEl.dataset.value);
-    stepEl.classList.toggle('active', n === level);
-    stepEl.classList.toggle('below', n < level);
   });
 
   if (!q) return;

@@ -878,12 +878,10 @@ header {
   color: var(--text-soft);
 }
 
-/* ---------- Math: wider layout for the level meter and big-number pictures ---------- */
+/* ---------- Lab: wider layout for big-number pictures ---------- */
 
 body[data-mode="lab"] header,
-body[data-mode="lab"] .app-container,
-body[data-mode="quest"] header,
-body[data-mode="quest"] .app-container {
+body[data-mode="lab"] .app-container {
   max-width: 740px;
 }
 
@@ -895,84 +893,6 @@ body[data-mode="quest"] .app-container {
 .quest-equation[data-size="l"] { font-size: 26px; gap: 8px; }
 .quest-equation[data-size="m"] .mystery-box { height: 54px; font-size: 32px; }
 .quest-equation[data-size="l"] .mystery-box { height: 46px; font-size: 26px; }
-
-/* ---------- Mystery Quest: climbing level meter ---------- */
-
-.quest-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 88px;
-  gap: 12px;
-  align-items: stretch;
-}
-
-.level-rail {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 18px;
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45);
-}
-
-.level-step {
-  flex: 1;
-  min-height: 64px;
-  border-radius: 12px;
-  border: 1px solid #334155;
-  background: #1e293b;
-  color: #64748b;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.15s ease;
-}
-
-.level-step.below {
-  background: rgba(79, 70, 229, 0.22);
-  border-color: rgba(129, 140, 248, 0.45);
-  color: #a5b4fc;
-}
-
-.level-step.active {
-  background: var(--accent-indigo);
-  border-color: var(--accent-indigo-light);
-  color: #fff;
-  box-shadow: 0 2px 10px rgba(79, 70, 229, 0.5);
-}
-
-.level-step:active {
-  transform: scale(0.96);
-}
-
-.level-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 30px;
-}
-
-.level-bars i {
-  width: 7px;
-  border-radius: 2px;
-  background: currentColor;
-}
-
-.level-bars i:nth-child(1) { height: 8px; }
-.level-bars i:nth-child(2) { height: 13px; }
-.level-bars i:nth-child(3) { height: 18px; }
-.level-bars i:nth-child(4) { height: 24px; }
-.level-bars i:nth-child(5) { height: 30px; }
-
-.level-num {
-  font-size: 15px;
-  font-weight: 800;
-}
 
 /* ---------- Lab: one ▲▼ column per place value ---------- */
 
@@ -1294,6 +1214,158 @@ body[data-mode="quest"] .app-container {
   background: #fff;
   border: 3px solid var(--accent-indigo-light);
   box-sizing: border-box;
+}
+
+/* ---------- Grown-up settings ---------- */
+
+/* Quiet gear on Home. Holding it fills a ring for 3 seconds, then settings open. */
+@property --hold {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
+.settings-btn {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  -webkit-touch-callout: none;
+}
+
+.settings-btn svg {
+  width: 26px;
+  height: 26px;
+}
+
+.settings-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(var(--accent-indigo-light) var(--hold), transparent 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+  opacity: 0;
+}
+
+.settings-btn.holding {
+  color: var(--accent-indigo-light);
+}
+
+.settings-btn.holding::before {
+  opacity: 1;
+  animation: hold-fill 3s linear forwards;
+}
+
+@keyframes hold-fill {
+  to { --hold: 100%; }
+}
+
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(2, 6, 23, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.settings-card {
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+
+.settings-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settings-head h2 {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.settings-close {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: var(--text-muted);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.settings-section h3 {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.settings-help {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 2px 0 10px;
+}
+
+.settings-levels {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-level {
+  min-height: 56px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: var(--text-soft);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+}
+
+.settings-level-num {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+.settings-level.active {
+  background: var(--accent-indigo);
+  border-color: var(--accent-indigo-light);
+  color: #fff;
+}
+
+.settings-level.active .settings-level-num {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.settings-done {
+  margin-top: 4px;
 }
 
 /* ---------- Header: home button ---------- */

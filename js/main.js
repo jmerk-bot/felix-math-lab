@@ -6,6 +6,7 @@ import { playChime } from './audio.js';
 import { clampLab, renderLab, setLabOp, stepA, stepB } from './lab.js';
 import { generateNewQuest, pressKey, renderQuest, renderQuestBanner, setLevel, toggleQuestFilter } from './quest.js';
 import { buildKeyboard, pressTile, renderSpell, sayWord, startWord, toggleLevel } from './spell.js';
+import { closeSettings, initSettings, renderSettings, settingsOpen } from './settings.js';
 import { initPwa } from './pwa.js';
 
 const $ = (id) => document.getElementById(id);
@@ -27,6 +28,7 @@ function switchMode(newMode, { boot = false } = {}) {
 
   $('app-title').textContent = TITLES[newMode];
   $('home-btn').hidden = newMode === 'home';
+  $('settings-btn').hidden = newMode !== 'home';
   $('math-tabs').hidden = !MATH_VIEWS.includes(newMode);
   $('tab-lab').classList.toggle('active', newMode === 'lab');
   $('tab-quest').classList.toggle('active', newMode === 'quest');
@@ -98,7 +100,8 @@ const actions = {
   'step-a': (value) => stepA(Number(value)),
   'step-b': (value) => stepB(Number(value)),
   'quest-filter': (value) => toggleQuestFilter(value),
-  'quest-level': (value) => { setLevel(Number(value)); clampLab(); renderLab(); },
+  'settings-level': (value) => { setLevel(Number(value)); clampLab(); renderLab(); renderSettings(); },
+  'settings-close': () => closeSettings(),
   'quest-skip': () => nextQuest(),
   'quest-next': () => nextQuest(),
   'quest-to-lab': () => sendQuestToLab(),
@@ -120,7 +123,7 @@ document.addEventListener('click', (event) => {
 // A physical keyboard drives the number pad and letter tiles too (handy when
 // testing on a computer). Digraph tiles are tap-only.
 document.addEventListener('keydown', (event) => {
-  if (event.metaKey || event.ctrlKey || event.altKey) return;
+  if (event.metaKey || event.ctrlKey || event.altKey || settingsOpen()) return;
   const k = event.key;
   if (state.mode === 'quest') {
     const key = /^[0-9]$/.test(k) ? k : k === 'Backspace' ? 'back' : k === 'Enter' ? 'solve' : null;
@@ -148,6 +151,7 @@ if (state.quest.problem) renderQuest();
 else generateNewQuest();
 buildKeyboard();
 renderSpell();
+initSettings();
 switchMode('home', { boot: true });
 initPwa();
 saveState();
