@@ -50,15 +50,16 @@ export function setLabOp(op) {
 function step(key, delta) {
   const lab = state.lab;
   const lim = limits(lab.op, lab.a);
-  const [min, max] = key === 'a' ? [lim.aMin, lim.aMax] : [lim.bMin, lim.bMax];
+  const [, max] = key === 'a' ? [lim.aMin, lim.aMax] : [lim.bMin, lim.bMax];
+  const cap = key === 'a' ? lim.aMax : lim.bCap;
   const next = lab[key] + delta;
-  if ((next < min || next > max) && Math.abs(delta) !== 1) return;
+  if ((next < 0 || next > max) && Math.abs(delta) !== 1) return;
   lab[key] = next;
   clampLab();
   renderLab();
   const value = lab[key];
   // Simple steppers chime the value; digit columns chime that column's digit
-  playChime(Math.abs(delta) === 1 && max <= 20 ? value : Math.floor(value / Math.abs(delta)) % 10);
+  playChime(Math.abs(delta) === 1 && cap <= 20 ? value : Math.floor(value / Math.abs(delta)) % 10);
 }
 
 export const stepA = (delta) => step('a', delta);

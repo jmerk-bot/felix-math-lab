@@ -7,10 +7,11 @@ import { playChime } from './audio.js';
 import { clampLab, renderLab, setLabOp, stepA, stepB } from './lab.js';
 import { generateNewQuest, pressKey, renderQuest, renderQuestBanner, setLevel, toggleQuestFilter } from './quest.js';
 import { buildKeyboard, pressTile, renderSpell, sayWord, startWord, toggleLevel } from './spell.js';
-import { closeSettings, initSettings, renderSettings, settingsOpen } from './settings.js';
+import { closeSettings, initSettings, renderSettings, settingsOpen, saveCloudSettings, clearCloudSettings } from './settings.js';
 import * as J from './journey.js';
 import * as UI from './journey-ui.js';
 import { initPwa } from './pwa.js';
+import { initCloud } from './cloud.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -101,24 +102,49 @@ function nextQuest() {
 
 function pickWords() {
   const spell = state.spell;
+  spell.returnTo = null;
+  if (J.journeyOn()) {
+    if (state.journey.pendingComplete) {
+      switchMode('spell');
+      startCompletion('spell');
+      return;
+    }
+    if (spell.status === 'correct') {
+      afterWord();
+      return;
+    }
+    if (J.needsMathBreak()) {
+      startMathBreak();
+      return;
+    }
+  }
   switchMode('spell');
-  if (J.journeyOn() && state.journey.pendingComplete) {
-    startCompletion('spell');
-  } else if (!spell.word || spell.status === 'correct') {
+  if (!spell.word || spell.status === 'correct') {
     startWord(null);
   } else {
     // Pick up the unfinished word, as a regular word now
-    spell.returnTo = null;
     renderSpell();
     sayWord();
   }
 }
 
 function pickMath() {
-  switchMode(state.mathView);
-  if (!J.journeyOn() || state.mathView !== 'quest') return;
-  if (state.journey.pendingComplete) startCompletion('quest');
-  else if (state.quest.status === 'correct') nextQuest(); // don't come back to a finished quest
+  state.quest.returnTo = null;
+  if (state.mathView !== 'quest') {
+    switchMode(state.mathView);
+    return;
+  }
+  if (J.journeyOn() && state.journey.pendingComplete) {
+    switchMode('quest');
+    startCompletion('quest');
+  } else if (state.quest.status === 'correct') {
+    switchMode('quest');
+    nextQuest(); // don't come back to a finished quest
+  } else if (J.journeyOn() && J.needsWordBreak()) {
+    startWordBreak();
+  } else {
+    switchMode('quest');
+  }
 }
 
 function afterWord() {
@@ -161,6 +187,7 @@ function launchNewRocket() {
   UI.launch(rocket, {
     onDone: () => {
       flow.outcome = J.finishRocket();
+      if (flow.outcome === 'next' || flow.outcome === 'ready') generateNewQuest();
       saveState();
       switchMode('hangar');
       UI.renderHangar({ highlightLast: true, showContinue: true });
@@ -192,10 +219,13 @@ function briefingDone() {
 function keysKey(value) {
   if (UI.pressKeysKey(value) !== 'unlocked') return;
   const dest = J.unlockNextDestination();
+  if (!dest) return;
+  flow.outcome = null;
+  $('hangar-continue').hidden = true;
   clampLab();
   renderLab();
+  generateNewQuest();
   UI.renderJourney();
-  if (state.mode === 'quest' && state.quest.status !== 'correct') generateNewQuest();
   UI.openBriefing({ kicker: `Next stop: ${dest.short}!`, intro: ['keys-ok', `next-${dest.id}`] });
 }
 
@@ -212,7 +242,14 @@ const actions = {
   'pick-math': () => pickMath(),
   'pick-words': () => pickWords(),
   'open-hangar': () => switchMode('hangar'),
-  'mode': (value) => switchMode(value),
+  'mode': (value) => {
+    if (value === 'quest') {
+      state.mathView = 'quest';
+      pickMath();
+    } else {
+      switchMode(value);
+    }
+  },
   'lab-op': (value) => setLabOp(value),
   'step-a': (value) => stepA(Number(value)),
   'step-b': (value) => stepB(Number(value)),
@@ -227,19 +264,24 @@ const actions = {
   },
   'settings-journey': (value) => {
     state.journey.on = value === 'on';
-    if (state.quest.status !== 'correct') generateNewQuest();
-    renderQuest();
+    state.quest.returnTo = null;
+    if (state.journey.on) state.quest.level = J.currentDestination().level;
+    generateNewQuest();
+    clampLab();
+    renderLab();
     renderSettings();
     UI.renderJourney();
   },
   'settings-close': () => closeSettings(),
+  'cloud-save': () => saveCloudSettings(),
+  'cloud-clear': () => clearCloudSettings(),
   'quest-skip': () => nextQuest(),
   'quest-next': () => nextQuest(),
   'quest-to-lab': () => sendQuestToLab(),
   'key': (value) => pressKey(value),
   'spell-key': (value) => pressTile(value),
   'spell-say': () => sayWord(),
-  'spell-skip': () => startWord(),
+  'spell-skip': () => (state.spell.status === 'correct' ? afterWord() : startWord()),
   'spell-next': () => afterWord(),
   'spell-level': (value) => toggleLevel(value),
   'paint': (value) => UI.paint(value),
@@ -252,11 +294,14 @@ const actions = {
   'journey-close': () => UI.closeOverlay()
 };
 
+const NO_TOUCH_ACTIONS = new Set(['cloud-save', 'cloud-clear', 'settings-close']);
+
 document.addEventListener('click', (event) => {
   const el = event.target.closest('[data-action]');
   if (!el) return;
-  actions[el.dataset.action]?.(el.dataset.value);
-  saveState();
+  const action = el.dataset.action;
+  actions[action]?.(el.dataset.value);
+  saveState({ touch: !NO_TOUCH_ACTIONS.has(action) });
 });
 
 // A physical keyboard drives the number pad and letter tiles too (handy when
@@ -282,18 +327,29 @@ document.addEventListener('keydown', (event) => {
   saveState();
 });
 
+function refreshAfterStateLoad() {
+  if (state.journey.on) state.quest.level = J.currentDestination().level;
+  clampLab();
+  renderLab();
+  if (state.quest.problem) renderQuest();
+  else generateNewQuest();
+  renderSpell();
+  if (settingsOpen()) renderSettings();
+  if (state.mode === 'hangar') UI.renderHangar();
+  UI.renderJourney();
+}
+
 // Boot: always open on Home
 loadState();
-if (state.journey.on) state.quest.level = J.currentDestination().level;
-clampLab();
-renderLab();
-if (state.quest.problem) renderQuest();
-else generateNewQuest();
 buildKeyboard();
-renderSpell();
 initSettings();
+refreshAfterStateLoad();
 switchMode('home', { boot: true });
 initPwa();
-saveState();
+saveState({ touch: false });
+initCloud(() => {
+  refreshAfterStateLoad();
+  saveState({ touch: false });
+});
 // Ask the browser not to clear the app's storage (the hangar lives there)
 navigator.storage?.persist?.().catch(() => {});

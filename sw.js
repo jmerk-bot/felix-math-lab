@@ -34,6 +34,7 @@ const APP_SHELL = [
   './js/voice.js',
   './js/journey.js',
   './js/journey-ui.js',
+  './js/cloud.js',
   './fonts/atkinson-hyperlegible-next-latin.woff2',
   './manifest.webmanifest',
   './icons/icon-192.png',
@@ -84,10 +85,11 @@ self.addEventListener('message', (event) => {
 async function precache(urls) {
   const cache = await caches.open(CACHE);
   for (const url of urls) {
-    if (new URL(url).origin !== self.location.origin || await cache.match(url)) continue;
     try {
-      const response = await fetch(url, { cache: 'no-cache' });
-      if (response.status === 200) await cache.put(url, response);
+      const parsed = new URL(url, self.location.origin);
+      if (parsed.origin !== self.location.origin || await cache.match(parsed.href)) continue;
+      const response = await fetch(parsed.href, { cache: 'no-cache' });
+      if (response.status === 200) await cache.put(parsed.href, response);
     } catch (e) {} // offline: try again next launch
   }
 }
@@ -101,6 +103,7 @@ async function networkFirst(request) {
     : new Request(request, { cache: 'no-cache' });
 
   const network = fetch(freshRequest).then((response) => {
+    if (response.status >= 500) throw new Error(`HTTP ${response.status}`);
     // Only whole responses: a 206 (partial) can't be cached
     if (response.status === 200) cache.put(request, response.clone());
     return response;

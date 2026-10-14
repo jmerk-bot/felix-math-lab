@@ -6,7 +6,7 @@ import { state, OP_LABEL } from './state.js';
 import { MISSIONS, DESTINATIONS, destinationOf, missionsIn, missionProblem } from './missions.js';
 import { FAMILIES, PAINTS, rocketSvg } from './rockets.js';
 import { voiceAudio } from './voice.js';
-import { playClips, playTick, playRumble } from './audio.js';
+import { playClips, playTick, playRumble, stopClips } from './audio.js';
 import { fmt } from './levels.js';
 import { manipulativeHtml } from './lab.js';
 import * as J from './journey.js';
@@ -76,7 +76,16 @@ export function renderHangar({ highlightLast = false, showContinue = false } = {
 
 // ---------- Overlays ----------
 
+let launchTimers = [];
+let keys = null; // { problem, entry }
+
+function clearLaunchTimers() {
+  launchTimers.forEach(clearTimeout);
+  launchTimers = [];
+}
+
 function openOverlay(html, kind) {
+  clearLaunchTimers();
   const o = $('journey-overlay');
   o.className = `journey-overlay ${kind}`;
   o.innerHTML = html;
@@ -84,6 +93,10 @@ function openOverlay(html, kind) {
 }
 
 export function closeOverlay() {
+  const wasLaunch = $('journey-overlay').classList.contains('launch');
+  clearLaunchTimers();
+  if (wasLaunch) stopClips();
+  keys = null;
   const o = $('journey-overlay');
   o.hidden = true;
   o.innerHTML = '';
@@ -135,6 +148,7 @@ export function launch(rocket, { hangarMessage = true, onDone } = {}) {
   const scene = document.querySelector('.launch-scene');
   const count = (n) => {
     const el = $('countdown');
+    if (!el) return;
     el.textContent = n;
     el.classList.remove('pop');
     void el.offsetWidth;
@@ -144,16 +158,17 @@ export function launch(rocket, { hangarMessage = true, onDone } = {}) {
     [0, () => { count('3'); say('count-3'); }],
     [1000, () => { count('2'); say('count-2'); }],
     [2000, () => { count('1'); say('count-1'); }],
-    [3000, () => { count(''); scene.classList.add('ignite'); say('blast-off'); playRumble(3.4); }],
-    [3800, () => scene.classList.add('liftoff')],
+    [3000, () => { count(''); scene?.classList.add('ignite'); say('blast-off'); playRumble(3.4); }],
+    [3800, () => scene?.classList.add('liftoff')],
     [hangarMessage ? 6000 : 6400, () => {
       if (!hangarMessage) return;
-      $('launch-msg').hidden = false;
+      const msg = $('launch-msg');
+      if (msg) msg.hidden = false;
       say('to-hangar');
     }],
     [hangarMessage ? 7600 : 6600, () => { closeOverlay(); onDone?.(); }]
   ];
-  timeline.forEach(([t, fn]) => setTimeout(() => { if (overlayOpen()) fn(); }, t));
+  launchTimers = timeline.map(([t, fn]) => setTimeout(() => { if (overlayOpen()) fn(); }, t));
 }
 
 // Mission briefing: the concept, one worked example with its Lab picture,
@@ -196,9 +211,8 @@ export function openPractice() {
 
 // ---------- Rocket keys (Dad's question) ----------
 
-let keys = null; // { problem, entry }
-
 export function openKeys() {
+  if (!J.canAskForKeys()) return;
   keys = { problem: J.makeKeysProblem(), entry: '' };
   renderKeys();
 }

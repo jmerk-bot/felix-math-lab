@@ -33,6 +33,9 @@ function nextFromQueue() {
   return spell.queue.shift();
 }
 
+const ALL_TILES = new Set([...TILES.vowels, ...TILES.consonants, ...TILES.digraphs]);
+let sayTimer = null;
+
 // Start a new word. returnTo is 'quest' when the word interrupts Math.
 export function startWord(returnTo = state.spell.returnTo) {
   const spell = state.spell;
@@ -47,10 +50,16 @@ export function startWord(returnTo = state.spell.returnTo) {
   });
   renderSpell();
   preloadClips([wordAudio(word.word)]);
-  setTimeout(sayWord, 250);
+  clearTimeout(sayTimer);
+  sayTimer = setTimeout(() => {
+    sayTimer = null;
+    if (state.mode === 'spell') sayWord();
+  }, 250);
 }
 
 export function sayWord() {
+  clearTimeout(sayTimer);
+  sayTimer = null;
   if (state.spell.word) playClips(wordAudio(state.spell.word.word));
 }
 
@@ -88,6 +97,7 @@ export function pressTile(key) {
       }
     }
   } else {
+    if (!ALL_TILES.has(key)) return;
     const i = spell.boxes.indexOf(null);
     if (i === -1) {
       nudge('.sound-box'); // every box is full: check or delete
@@ -114,7 +124,9 @@ function checkSpelling() {
 
   if (spell.locked.every(Boolean)) {
     spell.status = 'correct';
-    if (spell.attempts >= 2) spell.queue.splice(2, 0, spell.word); // practice it again soon
+    if (spell.attempts >= 2 && !spell.queue.some((w) => w.word === spell.word.word)) {
+      spell.queue.splice(2, 0, spell.word); // practice it again soon
+    }
     let award = null;
     if (journeyOn()) {
       award = recordWord();

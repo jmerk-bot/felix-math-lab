@@ -2309,6 +2309,66 @@ body.journey[data-mode="spell"] .app-container {
   justify-content: center;
 }
 
+.cloud-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cloud-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 15px;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.cloud-input:focus {
+  outline: 2px solid var(--accent-indigo-light);
+  border-color: transparent;
+}
+
+.cloud-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.cloud-btn {
+  flex: 1;
+  min-height: 48px;
+  justify-content: center;
+  background: var(--accent-indigo);
+  border-color: var(--accent-indigo-light);
+  color: #fff;
+}
+
+.cloud-btn.cloud-clear {
+  flex: 0 0 auto;
+  background: #1e293b;
+  border-color: #475569;
+  color: var(--text-muted);
+}
+
+.cloud-status {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.cloud-status.ok {
+  color: var(--accent-green-light);
+}
+
+.cloud-status.error {
+  color: var(--accent-amber);
+}
+
 /* ---------- Footer ---------- */
 
 .app-version {

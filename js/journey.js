@@ -7,7 +7,7 @@
 
 import { state } from './state.js';
 import { MISSIONS, DESTINATIONS, destinationOf, missionsIn, firstMissionOf, missionProblem, keysProblem } from './missions.js';
-import { FAMILIES } from './rockets.js';
+import { FAMILIES, PAINTS } from './rockets.js';
 
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
 const MOVE_ON_RATE = 0.7; // first-try share needed to go to the next mission
@@ -96,6 +96,7 @@ function addToFlight(kind) {
 }
 
 export function paintRocket(role, color) {
+  if (!PAINTS.includes(color)) return;
   const rocket = currentRocket();
   rocket.colors[role === 'trim' ? 1 : 0] = color;
 }
@@ -144,6 +145,7 @@ function refitRocket() {
   j.rocket = null;
   const rocket = currentRocket();
   rocket.earned = Math.min(earned, rocket.total - 1);
+  j.pendingComplete = false;
 }
 
 // Dad's keys: is there a next destination, and what's the question?

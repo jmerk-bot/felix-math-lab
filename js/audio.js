@@ -2,10 +2,11 @@
 // speech clips (spelling words and feedback, from audio/).
 
 let audioCtx = null;
+let currentRumble = null;
 
 function ctx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
   return audioCtx;
 }
 
@@ -61,6 +62,7 @@ export function playTick() {
 // Rocket liftoff: filtered noise that swells, opens up, and fades away
 export function playRumble(seconds = 3) {
   try {
+    try { currentRumble?.stop(); } catch (e) {}
     const ac = ctx();
     const length = Math.floor(ac.sampleRate * seconds);
     const buffer = ac.createBuffer(1, length, ac.sampleRate);
@@ -83,6 +85,8 @@ export function playRumble(seconds = 3) {
     noise.connect(filter);
     filter.connect(gain);
     gain.connect(ac.destination);
+    currentRumble = noise;
+    noise.onended = () => { if (currentRumble === noise) currentRumble = null; };
     noise.start(t);
     noise.stop(t + seconds);
   } catch (e) {}
@@ -99,7 +103,10 @@ let sequence = 0;
 async function loadClip(url) {
   if (!buffers.has(url)) {
     buffers.set(url, fetch(url)
-      .then((res) => res.arrayBuffer())
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.arrayBuffer();
+      })
       .then((data) => ctx().decodeAudioData(data))
       .catch((e) => { buffers.delete(url); throw e; }));
   }
@@ -120,7 +127,9 @@ function playBuffer(buffer) {
 export function stopClips() {
   sequence++;
   try { current?.stop(); } catch (e) {}
+  try { currentRumble?.stop(); } catch (e) {}
   current = null;
+  currentRumble = null;
 }
 
 // Plays clips one after another, stopping anything already playing.

@@ -2,7 +2,7 @@
 
 import { LEVELS } from './words.js';
 import { MISSIONS, firstMissionOf } from './missions.js';
-import { FAMILIES } from './rockets.js';
+import { FAMILIES, PAINTS } from './rockets.js';
 
 export const OPS = ['+', '-', '×', '÷'];
 
@@ -13,6 +13,7 @@ export const SPELL_EVERY = 3;
 export const OP_LABEL = { '+': '+', '-': '−', '×': '×', '÷': '÷' };
 
 export const state = {
+  updatedAt: 0, // timestamp (ms) of the last user action, used for cloud sync
   mode: 'home', // 'home', 'lab', 'quest' or 'spell'
   mathView: 'quest', // where "Math" on the home screen goes: 'lab' or 'quest'
   lab: {
@@ -74,23 +75,29 @@ export function compute(a, b, op) {
 
 const STORAGE_KEY = 'math-lab:v1';
 
-export function saveState() {
+export function serializeState() {
+  const { updatedAt, mathView, lab, quest, spell, journey } = state;
+  return {
+    updatedAt,
+    mathView,
+    lab,
+    quest: {
+      filters: quest.filters,
+      problem: quest.status === 'correct' ? null : quest.problem,
+      solvedSinceSpelling: quest.solvedSinceSpelling,
+      level: quest.level
+    },
+    spell: {
+      levels: spell.levels
+    },
+    journey
+  };
+}
+
+export function saveState({ touch = true } = {}) {
   try {
-    const { mathView, lab, quest, spell } = state;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      mathView,
-      lab,
-      quest: {
-        filters: quest.filters,
-        problem: quest.status === 'correct' ? null : quest.problem,
-        solvedSinceSpelling: quest.solvedSinceSpelling,
-        level: quest.level
-      },
-      spell: {
-        levels: spell.levels
-      },
-      journey: state.journey
-    }));
+    if (touch) state.updatedAt = Date.now();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeState()));
   } catch (e) {}
 }
 
@@ -101,7 +108,15 @@ export function loadState() {
   } catch (e) {
     return;
   }
-  if (!saved || typeof saved !== 'object') return;
+  applySavedState(saved);
+}
+
+export function applySavedState(saved) {
+  if (!saved || typeof saved !== 'object') return false;
+
+  if (Number.isInteger(saved.updatedAt) && saved.updatedAt >= 0) {
+    state.updatedAt = saved.updatedAt;
+  }
 
   const mathView = saved.mathView ?? saved.mode; // older saves stored `mode`
   if (mathView === 'lab' || mathView === 'quest') state.mathView = mathView;
@@ -115,11 +130,6 @@ export function loadState() {
   if (Array.isArray(filters)) {
     const valid = OPS.filter(op => filters.includes(op));
     if (valid.length) state.quest.filters = valid;
-  }
-
-  const problem = saved.quest?.problem;
-  if (isValidProblem(problem) && state.quest.filters.includes(problem.op)) {
-    state.quest.problem = problem;
   }
 
   const level = saved.quest?.level;
@@ -137,6 +147,17 @@ export function loadState() {
   loadJourney(saved.journey);
   // First launch with the journey: start at the level the grown-up already chose
   if (!saved.journey) state.journey.mission = Math.max(0, firstMissionOf(state.quest.level));
+
+  const problem = saved.quest?.problem;
+  if (isValidProblem(problem)) {
+    const fitsMode = state.journey.on
+      ? typeof problem.mission === 'string' && MISSIONS.some((m) => m.id === problem.mission)
+      : state.quest.filters.includes(problem.op);
+    state.quest.problem = fitsMode ? problem : null;
+  } else {
+    state.quest.problem = null;
+  }
+  return true;
 }
 
 // Journey progress is precious (a hangar full of rockets), so it's checked
@@ -144,26 +165,65 @@ export function loadState() {
 function loadJourney(saved) {
   if (!saved || typeof saved !== 'object') return;
   const j = state.journey;
-  const isRocket = (r) => r && FAMILIES[r.family] && Number.isInteger(r.variant) && Array.isArray(r.colors);
+  const isRocket = (r) => r && typeof r === 'object'
+    && FAMILIES[r.family]
+    && Number.isInteger(r.variant) && r.variant >= 0
+    && Array.isArray(r.colors) && r.colors.length === 2
+    && r.colors.every((c) => PAINTS.includes(c));
   if (typeof saved.on === 'boolean') j.on = saved.on;
   if (Number.isInteger(saved.mission) && saved.mission >= 0 && saved.mission < MISSIONS.length) j.mission = saved.mission;
   if (isRocket(saved.rocket) && Number.isInteger(saved.rocket.earned)) {
     const total = FAMILIES[saved.rocket.family].build.length;
-    j.rocket = { ...saved.rocket, total, earned: Math.max(0, Math.min(total, saved.rocket.earned)) };
+    j.rocket = {
+      family: saved.rocket.family,
+      variant: saved.rocket.variant,
+      earned: Math.max(0, Math.min(total, saved.rocket.earned)),
+      total,
+      colors: [...saved.rocket.colors]
+    };
   }
-  if (Array.isArray(saved.flight)) j.flight = saved.flight.filter((k) => k === 'math' || k === 'word').slice(0, 4);
-  if (saved.tries && Number.isInteger(saved.tries.rounds) && Number.isInteger(saved.tries.firstTry)) j.tries = saved.tries;
-  if (Number.isInteger(saved.practice)) j.practice = saved.practice;
+  if (Array.isArray(saved.flight)) j.flight = saved.flight.filter((k) => k === 'math' || k === 'word').slice(0, 3);
+  if (saved.tries
+    && Number.isInteger(saved.tries.rounds) && saved.tries.rounds >= 0
+    && Number.isInteger(saved.tries.firstTry) && saved.tries.firstTry >= 0
+    && saved.tries.firstTry <= saved.tries.rounds) {
+    j.tries = { rounds: saved.tries.rounds, firstTry: saved.tries.firstTry };
+  }
+  if (Number.isInteger(saved.practice) && saved.practice >= 0) j.practice = saved.practice;
   j.stepDown = saved.stepDown === true;
   j.ready = saved.ready === true;
   j.pendingComplete = saved.pendingComplete === true && !!j.rocket && j.rocket.earned >= j.rocket.total;
-  if (Array.isArray(saved.hangar)) j.hangar = saved.hangar.filter(isRocket);
-  if (saved.stats && typeof saved.stats === 'object') j.stats = saved.stats;
+  if (Array.isArray(saved.hangar)) {
+    j.hangar = saved.hangar.filter(isRocket).map((r) => ({
+      family: r.family,
+      variant: r.variant,
+      colors: [...r.colors],
+      mission: typeof r.mission === 'string' && MISSIONS.some((m) => m.id === r.mission) ? r.mission : MISSIONS[0].id,
+      practice: r.practice === true
+    }));
+  }
+  if (saved.stats && typeof saved.stats === 'object' && !Array.isArray(saved.stats)) {
+    const cleanStats = {};
+    for (const [k, v] of Object.entries(saved.stats)) {
+      if (MISSIONS.some((m) => m.id === k) && v && typeof v === 'object'
+        && Number.isInteger(v.rounds) && v.rounds >= 0
+        && Number.isInteger(v.firstTry) && v.firstTry >= 0
+        && Number.isInteger(v.rockets) && v.rockets >= 0) {
+        cleanStats[k] = { rounds: v.rounds, firstTry: v.firstTry, rockets: v.rockets };
+      }
+    }
+    j.stats = cleanStats;
+  }
 }
 
 function isValidProblem(p) {
   return !!p
     && OPS.includes(p.op)
     && ['a', 'b', 'target', 'expected'].every(k => Number.isInteger(p[k]))
-    && (p.missing === 'b' || p.missing === 'result');
+    && p.a >= 1
+    && p.b >= (p.op === '÷' ? 1 : 0)
+    && (p.op !== '÷' || p.a % p.b === 0)
+    && compute(p.a, p.b, p.op) === p.target
+    && (p.missing === 'b' || p.missing === 'result')
+    && p.expected === (p.missing === 'b' ? p.b : p.target);
 }

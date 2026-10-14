@@ -11,6 +11,7 @@
 import { APP_VERSION } from './version.js';
 import { ALL_AUDIO } from './words.js';
 import { VOICE_AUDIO } from './voice.js';
+import { saveState } from './state.js';
 
 const isDev = APP_VERSION.startsWith('__');
 const CHECK_EVERY_MS = 60 * 1000;
@@ -40,6 +41,7 @@ async function reloadIfOutdated() {
   } catch (e) {
     return;
   }
+  saveState();
   location.reload();
 }
 

@@ -44,7 +44,8 @@ Then open http://localhost:8765. The footer shows `dev` locally.
 | `js/journey.js` | Rocket journey logic: next quest, flights and pieces, moving on, the keys. |
 | `js/journey-ui.js` | Build rail, banner, hangar, paint job, launch, briefings and the keys screen. |
 | `js/voice.js` | Spoken lines for the journey (countdown, piece names, mission briefings). |
-| `js/settings.js` | Grown-up settings (hold the gear on Home): math level. |
+| `js/settings.js` | Grown-up settings (hold the gear on Home): math level and cloud backup. |
+| `js/cloud.js` | Cloud backup and restore to a private GitHub Gist every active minute. |
 | `js/main.js` | Entry point: wires buttons, moves between Home, Words and Math (and the word breaks), boots the app. |
 | `js/lab.js` | Explore Lab: steppers, and the pictures for each number size (ten-frames to area models), number line. |
 | `js/quest.js` | Mystery Quest: rendering, level meter, number pad, answer checking. |
@@ -65,7 +66,7 @@ Then open http://localhost:8765. The footer shows `dev` locally.
 
 ## Grown-up settings
 
-Hold the gear (top right of the Home screen) for 3 seconds to open the settings. A quick tap does nothing, so the level can't be changed by accident. The math level (early 2nd grade to 5th grade, which is also the journey's planet) is set there, and the rocket journey can be switched off for classic quests.
+Hold the gear (top right of the Home screen) for 3 seconds to open the settings. A quick tap does nothing, so the level can't be changed by accident. The math level (early 2nd grade to 5th grade, which is also the journey's planet) is set there, the rocket journey can be switched off for classic quests, and a GitHub token with `gist` access can be saved to back up and restore progress in the cloud every active minute.
 
 ## Making changes
 

@@ -277,6 +277,18 @@
         <p class="settings-help">Sets how hard Mystery Quest is and how big the Lab's numbers go. In the rocket journey it's the planet Felix is on; finishing a planet unlocks the next with Dad's keys.</p>
         <div id="settings-levels" class="settings-levels"></div>
       </div>
+      <div class="settings-section">
+        <h3>Cloud backup</h3>
+        <p class="settings-help">Saves progress to a private GitHub Gist every active minute and restores it automatically if this device is behind. Enter a GitHub token with <code>gist</code> access.</p>
+        <div class="cloud-controls">
+          <input id="cloud-token" class="cloud-input" type="password" placeholder="GitHub token (ghp_… or github_pat_…)" autocomplete="off" spellcheck="false" aria-label="GitHub token with gist access">
+          <div class="cloud-actions">
+            <button class="settings-level cloud-btn" data-action="cloud-save">Save &amp; Sync</button>
+            <button id="cloud-clear" class="settings-level cloud-btn cloud-clear" data-action="cloud-clear" hidden>Disconnect</button>
+          </div>
+          <p id="cloud-status" class="cloud-status"></p>
+        </div>
+      </div>
       <button class="next-quest-btn settings-done" data-action="settings-close">Done</button>
     </section>
   </div>

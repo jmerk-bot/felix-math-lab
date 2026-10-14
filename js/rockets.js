@@ -105,7 +105,9 @@ const attrs = (a) => Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(' ');
 // flame adds engine flames (for the launch); snap = a part to animate in.
 export function rocketSvg(family, { earned = Infinity, colors, flame = false, snap = null, cls = '' } = {}) {
   const fam = FAMILIES[family] || FAMILIES.moon;
-  const [main, trim] = colors || fam.palettes[0];
+  const [defMain, defTrim] = fam.palettes[0];
+  const main = Array.isArray(colors) && PAINTS.includes(colors[0]) ? colors[0] : defMain;
+  const trim = Array.isArray(colors) && PAINTS.includes(colors[1]) ? colors[1] : defTrim;
   const fills = { main, trim, ...FIXED };
   const built = new Set(fam.build.slice(0, earned));
   const shapes = [];
