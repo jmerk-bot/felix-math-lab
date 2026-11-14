@@ -121,13 +121,32 @@ export function rocketSvg(family, { earned = Infinity, colors, flame = false, sn
       else if (role === 'ring') paint = `class="part${anim}" fill="none" stroke="${trim}" stroke-width="4"`;
       else paint = `class="part${anim}" fill="${fills[role]}" stroke="rgba(2,6,23,0.45)" stroke-width="1.2"`;
       shapes.push([z, `<${tag} ${attrs(a)} ${paint}/>`]);
+      // Specular highlight on built porthole windows and main body stages
+      if (on && role === 'glass' && tag === 'circle') {
+        const gloss = { cx: +(a.cx - a.r * 0.3).toFixed(1), cy: +(a.cy - a.r * 0.3).toFixed(1), r: +(a.r * 0.34).toFixed(1) };
+        shapes.push([z + 0.2, `<circle ${attrs(gloss)} class="part${anim}" fill="rgba(255,255,255,0.78)"/>`]);
+      } else if (on && role === 'main' && tag === 'rect' && a.width >= 24) {
+        const shine = { x: +(a.x + 3).toFixed(1), y: +(a.y + 3).toFixed(1), width: +(a.width * 0.22).toFixed(1), height: Math.max(6, a.height - 6), rx: Math.min(4, a.rx || 2) };
+        shapes.push([z + 0.1, `<rect ${attrs(shine)} class="part${anim}" fill="rgba(255,255,255,0.18)"/>`]);
+      }
     }
   }
 
   if (flame) {
     for (const [x, y, w] of fam.flames) {
-      shapes.push([0, `<path class="flame" d="M${x - w} ${y} C${x - w * 0.6} ${y + 20} ${x - w * 0.2} ${y + 28} ${x} ${y + 40} C${x + w * 0.2} ${y + 28} ${x + w * 0.6} ${y + 20} ${x + w} ${y} Z" fill="#f97316"/>`]);
-      shapes.push([0.5, `<path class="flame inner" d="M${x - w * 0.5} ${y} C${x - w * 0.3} ${y + 12} ${x - w * 0.1} ${y + 18} ${x} ${y + 26} C${x + w * 0.1} ${y + 18} ${x + w * 0.3} ${y + 12} ${x + w * 0.5} ${y} Z" fill="#fde047"/>`]);
+      const outerW = +(w * 1.25).toFixed(1);
+      const midW = +(w * 0.85).toFixed(1);
+      const coreW = +(w * 0.45).toFixed(1);
+      // Warm nozzle radiance
+      shapes.push([-0.2, `<ellipse class="flame glow" cx="${x}" cy="${y + 8}" rx="${+(w * 1.7).toFixed(1)}" ry="${+(w * 1.3).toFixed(1)}" fill="rgba(249,115,22,0.42)"/>`]);
+      // Roaring crimson-orange outer supersonic plume
+      shapes.push([0, `<path class="flame outer" d="M${x - outerW} ${y} C${x - outerW * 0.85} ${y + 24} ${x - outerW * 0.35} ${y + 44} ${x} ${y + 66} C${x + outerW * 0.35} ${y + 44} ${x + outerW * 0.85} ${y + 24} ${x + outerW} ${y} Z" fill="#ea580c"/>`]);
+      // Fiery amber-gold mid-plume
+      shapes.push([0.3, `<path class="flame mid" d="M${x - midW} ${y} C${x - midW * 0.65} ${y + 18} ${x - midW * 0.25} ${y + 32} ${x} ${y + 46} C${x + midW * 0.25} ${y + 32} ${x + midW * 0.65} ${y + 18} ${x + midW} ${y} Z" fill="#fbbf24"/>`]);
+      // White-hot plasma core + Mach shock diamonds
+      shapes.push([0.6, `<path class="flame inner" d="M${x - coreW} ${y} C${x - coreW * 0.5} ${y + 10} ${x - coreW * 0.2} ${y + 18} ${x} ${y + 28} C${x + coreW * 0.2} ${y + 18} ${x + coreW * 0.5} ${y + 10} ${x + coreW} ${y} Z" fill="#f0f9ff"/>`]);
+      shapes.push([0.7, `<polygon class="flame diamond" points="${x},${y + 10} ${x + coreW * 0.55},${y + 17} ${x},${y + 24} ${x - coreW * 0.55},${y + 17}" fill="rgba(255,255,255,0.9)"/>`]);
+      shapes.push([0.7, `<polygon class="flame diamond" points="${x},${y + 27} ${x + coreW * 0.4},${y + 33} ${x},${y + 39} ${x - coreW * 0.4},${y + 33}" fill="rgba(254,240,138,0.85)"/>`]);
     }
   }
 

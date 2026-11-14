@@ -56,10 +56,12 @@ export const state = {
     hangar: [], // launched rockets: { family, variant, colors, mission, practice }
     stats: {} // per mission: { rounds, firstTry, rockets }
   },
-  // Optional 3-minute CrunchLabs video break after earning a piece (js/crunchlabs.js)
+  // Optional tiered CrunchLabs video break after earning a piece (js/crunchlabs.js)
   crunch: {
     enabled: true, // grown-up toggle
+    tier: '1-2', // '1-2' = 1m piece / 2m rocket launch bonus; '1-3' = 1m piece / 3m launch bonus
     available: false, // true right after earning a piece until watched or skipped
+    bonus: false, // true when the break is for completing & launching a whole rocket
     videoId: null, // current episode ID from CRUNCH_VIDEOS
     position: 0 // resume timestamp (seconds) in the current episode
   }
@@ -100,7 +102,9 @@ export function serializeState() {
     journey,
     crunch: {
       enabled: crunch.enabled,
+      tier: crunch.tier,
       available: crunch.available,
+      bonus: crunch.bonus,
       videoId: crunch.videoId,
       position: crunch.position
     }
@@ -164,7 +168,9 @@ export function applySavedState(saved) {
   const crunch = saved.crunch;
   if (crunch && typeof crunch === 'object') {
     if (typeof crunch.enabled === 'boolean') state.crunch.enabled = crunch.enabled;
+    if (crunch.tier === '1-2' || crunch.tier === '1-3') state.crunch.tier = crunch.tier;
     if (typeof crunch.available === 'boolean') state.crunch.available = crunch.available && state.crunch.enabled;
+    if (typeof crunch.bonus === 'boolean') state.crunch.bonus = crunch.bonus && state.crunch.available;
     if (typeof crunch.videoId === 'string' && /^[A-Za-z0-9_-]{11}$/.test(crunch.videoId)) {
       state.crunch.videoId = crunch.videoId;
     }

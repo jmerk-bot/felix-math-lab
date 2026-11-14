@@ -282,10 +282,16 @@ const actions = {
     UI.renderJourney();
   },
   'settings-crunch': (value) => {
-    state.crunch.enabled = value === 'on';
-    if (!state.crunch.enabled) dismissCrunchBreak();
+    if (value === 'off') {
+      state.crunch.enabled = false;
+      dismissCrunchBreak();
+    } else {
+      state.crunch.enabled = true;
+      if (value === '1-2' || value === '1-3') state.crunch.tier = value;
+    }
     renderQuest();
     renderSpell();
+    if (state.mode === 'hangar') UI.renderHangar({ showContinue: flow.outcome !== null });
     renderSettings();
   },
   'settings-close': () => closeSettings(),

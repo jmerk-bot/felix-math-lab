@@ -1,7 +1,8 @@
-// Optional 3-minute CrunchLabs video break after earning a rocket piece (or
-// finishing a classic quest loop). Plays inside a kid-safe overlay that blocks
-// external YouTube links, remembers the exact timestamp in the current episode,
-// and closes back to the Lab automatically when the 3:00 timer finishes.
+// Optional tiered CrunchLabs video break: 1 minute after earning a rocket piece
+// (or finishing a classic quest loop), and a 2–3 minute bonus break in the
+// Hangar after painting & launching a finished rocket. Plays inside a kid-safe
+// overlay that blocks external YouTube links, remembers the exact timestamp in
+// the current episode, and closes back to the Lab when the timer hits 0:00.
 
 import { state, saveState } from './state.js';
 import { playChime, playClips, stopClips } from './audio.js';
@@ -9,7 +10,19 @@ import { voiceAudio } from './voice.js';
 
 const $ = (id) => document.getElementById(id);
 
-export const CRUNCH_SECONDS = 180; // 3 minutes per earned break
+export const PIECE_SECONDS = 60; // 1 minute per earned piece
+
+export function crunchDurationSeconds() {
+  if (state.crunch.bonus) return state.crunch.tier === '1-3' ? 180 : 120;
+  return PIECE_SECONDS;
+}
+
+export function crunchButtonLabel() {
+  if (state.crunch.bonus) {
+    return state.crunch.tier === '1-3' ? '🎬 Bonus 3m CrunchLabs' : '🎬 Bonus 2m CrunchLabs';
+  }
+  return '🎬 Watch 1m CrunchLabs';
+}
 
 // Full-length 16:9 episodes from https://www.youtube.com/@CrunchLabs
 export const CRUNCH_VIDEOS = [
@@ -95,12 +108,16 @@ const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => (
 
 const isOnline = () => typeof navigator === 'undefined' || navigator.onLine !== false;
 
-export function grantCrunchBreak() {
-  if (state.crunch.enabled) state.crunch.available = true;
+export function grantCrunchBreak({ bonus = false } = {}) {
+  if (state.crunch.enabled) {
+    state.crunch.available = true;
+    state.crunch.bonus = bonus;
+  }
 }
 
 export function dismissCrunchBreak() {
   state.crunch.available = false;
+  state.crunch.bonus = false;
 }
 
 // On the final piece of a rocket, wait until after Paint & Launch so the reward
@@ -232,7 +249,7 @@ function updateChrome() {
     timerEl.classList.toggle('ending', session.remainingMs <= 15_000);
   }
   if (barEl) {
-    const pct = Math.max(0, Math.min(100, (session.remainingMs / (CRUNCH_SECONDS * 1000)) * 100));
+    const pct = Math.max(0, Math.min(100, (session.remainingMs / session.totalMs) * 100));
     barEl.style.width = `${pct}%`;
   }
   if (shieldEl) {
@@ -313,7 +330,10 @@ function mountPlayer(YT, video) {
 
 export function openCrunch({ onDone = null } = {}) {
   closeCrunch({ silent: true });
+  const totalMs = crunchDurationSeconds() * 1000;
+  const isBonus = state.crunch.bonus;
   state.crunch.available = false;
+  state.crunch.bonus = false;
   stopClips();
 
   const video = currentVideo();
@@ -322,10 +342,10 @@ export function openCrunch({ onDone = null } = {}) {
     <section class="card crunch-card" role="dialog" aria-modal="true" aria-label="CrunchLabs video break">
       <div class="crunch-top">
         <div class="crunch-title-wrap">
-          <span class="crunch-badge">⚙️ CRUNCHLABS</span>
+          <span class="crunch-badge">${isBonus ? '🚀 LAUNCH BONUS' : '⚙️ CRUNCHLABS'}</span>
           <span id="crunch-title" class="crunch-title">${escapeHtml(video.title)}</span>
         </div>
-        <div id="crunch-timer" class="crunch-timer">3:00</div>
+        <div id="crunch-timer" class="crunch-timer">${formatTime(totalMs)}</div>
       </div>
       <div class="crunch-bar-track" aria-hidden="true">
         <div id="crunch-bar-fill" class="crunch-bar-fill"></div>
@@ -351,7 +371,8 @@ export function openCrunch({ onDone = null } = {}) {
   session = {
     player: null,
     timerId: null,
-    remainingMs: CRUNCH_SECONDS * 1000,
+    totalMs,
+    remainingMs: totalMs,
     lastTick: performance.now(),
     playing: false,
     lastSavedAt: Date.now(),

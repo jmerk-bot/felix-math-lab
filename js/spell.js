@@ -6,7 +6,7 @@ import { TILES, LEVELS, WORDS, PHRASES, tileKind, wordAudio, phraseAudio } from 
 import { playTick, playSuccessChord, playClips, preloadClips } from './audio.js';
 import { journeyOn, recordWord } from './journey.js';
 import { renderJourney, pieceClip } from './journey-ui.js';
-import { canOfferCrunch, grantCrunchBreak } from './crunchlabs.js';
+import { canOfferCrunch, crunchButtonLabel, grantCrunchBreak } from './crunchlabs.js';
 
 const $ = (id) => document.getElementById(id);
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
@@ -214,6 +214,8 @@ export function renderSpell() {
 
   $('spell-keyboard').hidden = solved;
   $('spell-solved').hidden = !solved;
-  $('spell-crunch').hidden = !(solved && canOfferCrunch());
+  const crunchBtn = $('spell-crunch');
+  crunchBtn.hidden = !(solved && canOfferCrunch());
+  crunchBtn.textContent = crunchButtonLabel();
   $('spell-next').textContent = bonus ? 'Back to Math 🚀' : 'Next Word ➔';
 }

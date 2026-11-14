@@ -115,7 +115,10 @@ function addToFlight(kind) {
   rocket.earned = Math.min(rocket.total, rocket.earned + 1);
   const complete = rocket.earned >= rocket.total;
   if (complete) j.pendingComplete = true;
-  if (state.crunch.enabled) state.crunch.available = true;
+  if (state.crunch.enabled) {
+    state.crunch.available = true;
+    state.crunch.bonus = complete;
+  }
   return { part: FAMILIES[rocket.family].build[rocket.earned - 1], complete };
 }
 

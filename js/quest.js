@@ -5,7 +5,7 @@ import { makeProblem, levelInfo, fmt } from './levels.js';
 import { playChime, playSuccessChord, playClips } from './audio.js';
 import { journeyOn, nextJourneyProblem, recordMath } from './journey.js';
 import { renderJourney, pieceClip } from './journey-ui.js';
-import { canOfferCrunch } from './crunchlabs.js';
+import { canOfferCrunch, crunchButtonLabel } from './crunchlabs.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -112,7 +112,9 @@ export function renderQuest() {
   const solved = status === 'correct';
   $('quest-active-controls').hidden = solved;
   $('quest-solved-controls').hidden = !solved;
-  $('quest-crunch').hidden = !(solved && canOfferCrunch());
+  const crunchBtn = $('quest-crunch');
+  crunchBtn.hidden = !(solved && canOfferCrunch());
+  crunchBtn.textContent = crunchButtonLabel();
 
   const tag = $('quest-tag-status');
   tag.hidden = status === 'playing';

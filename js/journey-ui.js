@@ -6,11 +6,11 @@ import { state, OP_LABEL } from './state.js';
 import { MISSIONS, DESTINATIONS, destinationOf, missionsIn, missionProblem } from './missions.js';
 import { FAMILIES, PAINTS, rocketSvg } from './rockets.js';
 import { voiceAudio } from './voice.js';
-import { playClips, playTick, playRumble, stopClips } from './audio.js';
+import { playClips, playTick, playLaunchPing, playSuccessChord, playRumble, stopClips } from './audio.js';
 import { fmt } from './levels.js';
 import { manipulativeHtml } from './lab.js';
 import * as J from './journey.js';
-import { canOfferCrunch } from './crunchlabs.js';
+import { canOfferCrunch, crunchButtonLabel } from './crunchlabs.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -73,7 +73,9 @@ export function renderHangar({ highlightLast = false, showContinue = false } = {
       </section>`;
   }).join('');
   $('hangar-continue').hidden = !showContinue;
-  $('hangar-crunch').hidden = !(showContinue && canOfferCrunch());
+  const crunchBtn = $('hangar-crunch');
+  crunchBtn.hidden = !(showContinue && canOfferCrunch());
+  crunchBtn.textContent = crunchButtonLabel();
 }
 
 // ---------- Overlays ----------
@@ -134,17 +136,43 @@ export function paint(value) {
   openPaint();
 }
 
-// Countdown, ignition, liftoff. `hangarMessage` adds the "added to your
-// hangar" ending for a new rocket (not for replays from the hangar).
+// Countdown, gantry retraction, ignition, supersonic liftoff, warp streaks,
+// and orbital arrival. `hangarMessage` adds the "Added to your hangar!" ending
+// for a newly built rocket (replays show an orbital flyby banner instead).
 export function launch(rocket, { hangarMessage = true, onDone } = {}) {
+  const rName = nameOf(rocket);
+  const sparks = Array.from({ length: 14 }, (_, i) => `<i style="--i:${i}"></i>`).join('');
+  const smoke = '<i></i>'.repeat(12);
+  const warp = Array.from({ length: 12 }, (_, i) => `<i style="--i:${i}"></i>`).join('');
+  const burst = Array.from({ length: 12 }, (_, i) => `<i style="--i:${i}"></i>`).join('');
+
   openOverlay(`
     <div class="launch-scene">
+      <div class="launch-sky"></div>
       <div class="launch-stars"></div>
+      <div class="launch-warp">${warp}</div>
+      <span class="planet launch-planet ${rocket.family}" aria-hidden="true"></span>
       <div class="countdown" id="countdown"></div>
+      <div class="launch-glow"></div>
+      <div class="launch-shockwave"></div>
+      <div class="launch-ground">
+        <div class="launch-tower" aria-hidden="true">
+          <span class="tower-beacon"></span>
+          <span class="gantry-arm arm-top"></span>
+          <span class="gantry-arm arm-mid"></span>
+        </div>
+        <div class="launch-pad">
+          <span class="pad-trench"></span>
+        </div>
+        <div class="launch-sparks">${sparks}</div>
+        <div class="launch-smoke">${smoke}</div>
+      </div>
       <div class="launch-rocket">${rocketSvg(rocket.family, { colors: rocket.colors, flame: true })}</div>
-      <div class="launch-pad"></div>
-      <div class="launch-smoke"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-      <div class="launch-msg" id="launch-msg" hidden>Added to your hangar!</div>
+      <div class="orbit-burst">${burst}</div>
+      <div class="launch-msg" id="launch-msg" hidden>
+        <div class="launch-msg-name">🚀 ${rName}</div>
+        <div class="launch-msg-sub">${hangarMessage ? 'Added to your hangar!' : 'Reached orbit! ⭐'}</div>
+      </div>
     </div>`, 'launch');
 
   const scene = document.querySelector('.launch-scene');
@@ -154,21 +182,23 @@ export function launch(rocket, { hangarMessage = true, onDone } = {}) {
     el.textContent = n;
     el.classList.remove('pop');
     void el.offsetWidth;
-    el.classList.add('pop');
+    if (n) el.classList.add('pop');
   };
   const timeline = [
-    [0, () => { count('3'); say('count-3'); }],
-    [1000, () => { count('2'); say('count-2'); }],
-    [2000, () => { count('1'); say('count-1'); }],
-    [3000, () => { count(''); scene?.classList.add('ignite'); say('blast-off'); playRumble(3.4); }],
-    [3800, () => scene?.classList.add('liftoff')],
-    [hangarMessage ? 6000 : 6400, () => {
-      if (!hangarMessage) return;
+    [0, () => { count('3'); playLaunchPing(0); say('count-3'); }],
+    [1000, () => { count('2'); scene?.classList.add('vent'); playLaunchPing(2); say('count-2'); }],
+    [2000, () => { count('1'); scene?.classList.add('retract'); playLaunchPing(4); say('count-1'); }],
+    [3000, () => { count('🔥'); scene?.classList.add('ignite'); say('blast-off'); playRumble(4.0); }],
+    [3550, () => { count(''); }],
+    [3750, () => scene?.classList.add('liftoff')],
+    [5900, () => {
+      scene?.classList.add('orbit');
       const msg = $('launch-msg');
       if (msg) msg.hidden = false;
-      say('to-hangar');
+      playSuccessChord();
+      if (hangarMessage) say('to-hangar');
     }],
-    [hangarMessage ? 7600 : 6600, () => { closeOverlay(); onDone?.(); }]
+    [hangarMessage ? 7800 : 7000, () => { closeOverlay(); onDone?.(); }]
   ];
   launchTimers = timeline.map(([t, fn]) => setTimeout(() => { if (overlayOpen()) fn(); }, t));
 }

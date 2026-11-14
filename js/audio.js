@@ -59,36 +59,94 @@ export function playTick() {
   playTone(659.25, 0, 0.08);
 }
 
-// Rocket liftoff: filtered noise that swells, opens up, and fades away
-export function playRumble(seconds = 3) {
+// Crisp mission-control telemetry ping during 3-2-1 launch countdown
+export function playLaunchPing(step = 0) {
+  const f = pentatonicFreq(5 + step);
+  playTone(f, 0, 0.16);
+  playTone(f * 1.5, 0.04, 0.08);
+}
+
+// Rocket liftoff: multi-layered sub-bass engine throb, roaring crackle, and
+// high-altitude supersonic whoosh that swells and fades into orbit.
+export function playRumble(seconds = 3.8) {
   try {
     try { currentRumble?.stop(); } catch (e) {}
     const ac = ctx();
+    const t = ac.currentTime;
     const length = Math.floor(ac.sampleRate * seconds);
     const buffer = ac.createBuffer(1, length, ac.sampleRate);
     const data = buffer.getChannelData(0);
     for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
 
+    // Layer 1: Roaring filtered rocket exhaust noise
     const noise = ac.createBufferSource();
     noise.buffer = buffer;
     const filter = ac.createBiquadFilter();
     filter.type = 'lowpass';
-    const gain = ac.createGain();
-    const t = ac.currentTime;
-    filter.frequency.setValueAtTime(140, t);
-    filter.frequency.exponentialRampToValueAtTime(900, t + seconds * 0.6);
-    gain.gain.setValueAtTime(0.001, t);
-    gain.gain.exponentialRampToValueAtTime(0.35, t + 0.5);
-    gain.gain.setValueAtTime(0.35, t + seconds * 0.5);
-    gain.gain.exponentialRampToValueAtTime(0.001, t + seconds);
-
+    filter.Q.value = 1.8;
+    const noiseGain = ac.createGain();
+    filter.frequency.setValueAtTime(130, t);
+    filter.frequency.exponentialRampToValueAtTime(1350, t + seconds * 0.55);
+    filter.frequency.exponentialRampToValueAtTime(420, t + seconds);
+    noiseGain.gain.setValueAtTime(0.001, t);
+    noiseGain.gain.exponentialRampToValueAtTime(0.42, t + 0.35);
+    noiseGain.gain.setValueAtTime(0.42, t + seconds * 0.55);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, t + seconds);
     noise.connect(filter);
-    filter.connect(gain);
-    gain.connect(ac.destination);
-    currentRumble = noise;
-    noise.onended = () => { if (currentRumble === noise) currentRumble = null; };
-    noise.start(t);
-    noise.stop(t + seconds);
+    filter.connect(noiseGain);
+    noiseGain.connect(ac.destination);
+
+    // Layer 2: Deep pulsing sub-bass thrust (56Hz -> 40Hz with 18Hz flutter)
+    const sub = ac.createOscillator();
+    sub.type = 'sawtooth';
+    sub.frequency.setValueAtTime(58, t);
+    sub.frequency.linearRampToValueAtTime(42, t + seconds * 0.8);
+    const subFilter = ac.createBiquadFilter();
+    subFilter.type = 'lowpass';
+    subFilter.frequency.value = 115;
+    const subGain = ac.createGain();
+    subGain.gain.setValueAtTime(0.001, t);
+    subGain.gain.linearRampToValueAtTime(0.28, t + 0.25);
+    subGain.gain.setValueAtTime(0.24, t + seconds * 0.55);
+    subGain.gain.exponentialRampToValueAtTime(0.001, t + seconds);
+    const lfo = ac.createOscillator();
+    lfo.frequency.value = 18;
+    const lfoDepth = ac.createGain();
+    lfoDepth.gain.value = 0.08;
+    lfo.connect(lfoDepth);
+    lfoDepth.connect(subGain.gain);
+    sub.connect(subFilter);
+    subFilter.connect(subGain);
+    subGain.connect(ac.destination);
+
+    // Layer 3: Supersonic atmospheric whoosh on liftoff
+    const whoosh = ac.createBufferSource();
+    whoosh.buffer = buffer;
+    const band = ac.createBiquadFilter();
+    band.type = 'bandpass';
+    band.Q.value = 1.2;
+    band.frequency.setValueAtTime(320, t + 0.6);
+    band.frequency.exponentialRampToValueAtTime(2200, t + seconds * 0.65);
+    const whooshGain = ac.createGain();
+    whooshGain.gain.setValueAtTime(0.001, t);
+    whooshGain.gain.setValueAtTime(0.001, t + 0.55);
+    whooshGain.gain.exponentialRampToValueAtTime(0.2, t + 1.3);
+    whooshGain.gain.exponentialRampToValueAtTime(0.001, t + seconds);
+    whoosh.connect(band);
+    band.connect(whooshGain);
+    whooshGain.connect(ac.destination);
+
+    const handle = {
+      stop() {
+        [noise, sub, lfo, whoosh].forEach((n) => { try { n.stop(); } catch (e) {} });
+      }
+    };
+    currentRumble = handle;
+    noise.onended = () => { if (currentRumble === handle) currentRumble = null; };
+    [noise, sub, lfo, whoosh].forEach((n) => {
+      n.start(t);
+      n.stop(t + seconds);
+    });
   } catch (e) {}
 }
 
