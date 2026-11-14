@@ -5,8 +5,9 @@
 // one word. In Math that's 3 quests + a word break; in Words, 3 words + a
 // math break; mixing modes mid-flight also works.
 
-import { state } from './state.js';
+import { state, OPS } from './state.js';
 import { MISSIONS, DESTINATIONS, destinationOf, missionsIn, firstMissionOf, missionProblem, keysProblem } from './missions.js';
+import { makeProblem } from './levels.js';
 import { FAMILIES, PAINTS } from './rockets.js';
 
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
@@ -38,18 +39,36 @@ const counts = () => {
 export const needsWordBreak = () => { const c = counts(); return c.math >= 3 && c.word === 0; };
 export const needsMathBreak = () => { const c = counts(); return c.word >= 3 && c.math === 0; };
 
-// The next Mystery Quest
+function tryFromMissions(pool, tier, allowed) {
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  for (const m of shuffled) {
+    for (let i = 0; i < 12; i++) {
+      const p = missionProblem(m, tier);
+      if (allowed.includes(p.op)) return p;
+    }
+  }
+  return null;
+}
+
+// The next Mystery Quest, filtered by the operations Felix has toggled on
 export function nextJourneyProblem() {
   const j = state.journey;
   const mission = currentMission();
+  const allowed = state.quest.filters.length ? state.quest.filters : OPS;
+  const destMissions = missionsIn(mission.dest);
 
   // Destination finished (waiting for Dad's keys): victory laps of its missions
-  if (j.ready) return { ...missionProblem(pick(missionsIn(mission.dest)), 1), lap: true };
+  if (j.ready) {
+    const p = tryFromMissions(destMissions, 1, allowed)
+      || { ...makeProblem(pick(allowed), currentDestination().level), mission: mission.id, tier: 1 };
+    return { ...p, lap: true };
+  }
 
   // From mission 4 on, the third quest of a flight reviews a recent earlier mission
   if (counts().math === 2 && j.mission >= 3) {
     const earlier = MISSIONS.slice(Math.max(0, j.mission - 6), j.mission);
-    return { ...missionProblem(pick(earlier), 1), review: true };
+    const p = tryFromMissions(earlier, 1, allowed);
+    if (p) return { ...p, review: true };
   }
 
   // Easier numbers for a rocket's first piece, a stretch on the last piece when
@@ -59,7 +78,11 @@ export function nextJourneyProblem() {
   if (rocket.earned === 0) tier = 0;
   else if (rocket.earned === rocket.total - 1 && rate(j.tries) >= 0.8) tier = 2;
   if (j.stepDown) tier = Math.max(0, tier - 1);
-  return missionProblem(mission, tier);
+
+  const direct = tryFromMissions([mission], tier, allowed)
+    || tryFromMissions(destMissions, tier, allowed)
+    || { ...makeProblem(pick(allowed), currentDestination().level), tier };
+  return { ...direct, mission: mission.id };
 }
 
 // A solved quest. Returns { part, complete } when it finished a piece.
@@ -92,6 +115,7 @@ function addToFlight(kind) {
   rocket.earned = Math.min(rocket.total, rocket.earned + 1);
   const complete = rocket.earned >= rocket.total;
   if (complete) j.pendingComplete = true;
+  if (state.crunch.enabled) state.crunch.available = true;
   return { part: FAMILIES[rocket.family].build[rocket.earned - 1], complete };
 }
 

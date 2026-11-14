@@ -33,7 +33,7 @@ export const state = {
     returnTo: null // 'spell' when this quest is a math break from Words
   },
   spell: {
-    levels: LEVELS.map(l => l.id),
+    levels: ['cat', 'ship', 'frog'],
     word: null, // entry from WORDS
     boxes: [], // one tile (or null) per sound box
     locked: [], // boxes confirmed correct by a check
@@ -55,6 +55,13 @@ export const state = {
     pendingComplete: false, // a finished rocket waiting for its paint job and launch
     hangar: [], // launched rockets: { family, variant, colors, mission, practice }
     stats: {} // per mission: { rounds, firstTry, rockets }
+  },
+  // Optional 3-minute CrunchLabs video break after earning a piece (js/crunchlabs.js)
+  crunch: {
+    enabled: true, // grown-up toggle
+    available: false, // true right after earning a piece until watched or skipped
+    videoId: null, // current episode ID from CRUNCH_VIDEOS
+    position: 0 // resume timestamp (seconds) in the current episode
   }
 };
 
@@ -76,7 +83,7 @@ export function compute(a, b, op) {
 const STORAGE_KEY = 'math-lab:v1';
 
 export function serializeState() {
-  const { updatedAt, mathView, lab, quest, spell, journey } = state;
+  const { updatedAt, mathView, lab, quest, spell, journey, crunch } = state;
   return {
     updatedAt,
     mathView,
@@ -90,7 +97,13 @@ export function serializeState() {
     spell: {
       levels: spell.levels
     },
-    journey
+    journey,
+    crunch: {
+      enabled: crunch.enabled,
+      available: crunch.available,
+      videoId: crunch.videoId,
+      position: crunch.position
+    }
   };
 }
 
@@ -148,10 +161,24 @@ export function applySavedState(saved) {
   // First launch with the journey: start at the level the grown-up already chose
   if (!saved.journey) state.journey.mission = Math.max(0, firstMissionOf(state.quest.level));
 
+  const crunch = saved.crunch;
+  if (crunch && typeof crunch === 'object') {
+    if (typeof crunch.enabled === 'boolean') state.crunch.enabled = crunch.enabled;
+    if (typeof crunch.available === 'boolean') state.crunch.available = crunch.available && state.crunch.enabled;
+    if (typeof crunch.videoId === 'string' && /^[A-Za-z0-9_-]{11}$/.test(crunch.videoId)) {
+      state.crunch.videoId = crunch.videoId;
+    }
+    if (Number.isInteger(crunch.position) && crunch.position >= 0) {
+      state.crunch.position = crunch.position;
+    }
+  }
+
   const problem = saved.quest?.problem;
   if (isValidProblem(problem)) {
     const fitsMode = state.journey.on
-      ? typeof problem.mission === 'string' && MISSIONS.some((m) => m.id === problem.mission)
+      ? typeof problem.mission === 'string'
+        && MISSIONS.some((m) => m.id === problem.mission)
+        && state.quest.filters.includes(problem.op)
       : state.quest.filters.includes(problem.op);
     state.quest.problem = fitsMode ? problem : null;
   } else {

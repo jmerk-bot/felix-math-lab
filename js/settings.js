@@ -57,6 +57,10 @@ export function renderSettings() {
   $('settings-journey').innerHTML = [['on', '🚀 Rocket journey'], ['off', 'Classic quests']].map(([value, label]) => `
     <button class="settings-level ${value === mode ? 'active' : ''}" data-action="settings-journey" data-value="${value}">${label}</button>
   `).join('');
+  const crunchMode = state.crunch.enabled ? 'on' : 'off';
+  $('settings-crunch').innerHTML = [['on', '🎬 3-min break'], ['off', 'Off']].map(([value, label]) => `
+    <button class="settings-level ${value === crunchMode ? 'active' : ''}" data-action="settings-crunch" data-value="${value}">${label}</button>
+  `).join('');
   $('settings-levels').innerHTML = LEVELS.map((l) => `
     <button class="settings-level ${l.id === state.quest.level ? 'active' : ''}" data-action="settings-level" data-value="${l.id}">
       <span class="settings-level-num">${l.id}</span>

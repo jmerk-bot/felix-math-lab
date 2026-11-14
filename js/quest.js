@@ -5,6 +5,7 @@ import { makeProblem, levelInfo, fmt } from './levels.js';
 import { playChime, playSuccessChord, playClips } from './audio.js';
 import { journeyOn, nextJourneyProblem, recordMath } from './journey.js';
 import { renderJourney, pieceClip } from './journey-ui.js';
+import { canOfferCrunch } from './crunchlabs.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -62,8 +63,7 @@ export function renderQuest() {
   document.querySelectorAll('.filter-pill').forEach(pill => {
     pill.classList.toggle('active', filters.includes(pill.dataset.value));
   });
-  // Missions choose the operation, so the operation buttons are classic-mode only
-  $('quest-filters').hidden = journeyOn();
+  $('quest-filters').hidden = false;
   $('quest-break').hidden = state.quest.returnTo !== 'spell';
 
   if (!q) return;
@@ -112,6 +112,7 @@ export function renderQuest() {
   const solved = status === 'correct';
   $('quest-active-controls').hidden = solved;
   $('quest-solved-controls').hidden = !solved;
+  $('quest-crunch').hidden = !(solved && canOfferCrunch());
 
   const tag = $('quest-tag-status');
   tag.hidden = status === 'playing';

@@ -17,6 +17,7 @@ export const VOICE = [
   { id: 'practice', text: 'Practice flight! Same mission, brand new rocket.' },
   { id: 'word-break', text: 'Word break!' },
   { id: 'math-break', text: 'Math break!' },
+  { id: 'crunch-done', text: 'Break time is up! Back to the lab.' },
   ...DESTINATIONS.slice(1).map((d) => ({ id: `next-${d.id}`, text: `Next stop: ${d.name}!` })),
   ...Object.entries(PART_LABELS).map(([id, label]) => ({ id: `part-${id}`, text: `You built the ${label}!` })),
   ...MISSIONS.map((m) => ({ id: `mission-${m.id}`, text: m.say }))

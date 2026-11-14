@@ -25,7 +25,9 @@ export function tileKind(tile) {
 export const LEVELS = [
   { id: 'cat', label: 'cat', name: 'Short vowels' },
   { id: 'ship', label: 'ship', name: 'Digraphs' },
-  { id: 'frog', label: 'frog', name: 'Blends' }
+  { id: 'frog', label: 'frog', name: 'Blends' },
+  { id: 'chimp', label: 'chimp', name: 'Big blends' },
+  { id: 'rocket', label: 'rocket', name: 'Challenge words' }
 ];
 
 // [word, emoji, sounds] — sounds default to one tile per letter
@@ -50,6 +52,22 @@ const LISTS = {
     ['swim', '🏊'], ['gift', '🎁'], ['mask', '😷'], ['clap', '👏'],
     ['truck', '🚚', 't r u ck'], ['clock', '🕐', 'c l o ck'],
     ['brush', '🪥', 'b r u sh'], ['trash', '🗑️', 't r a sh']
+  ],
+  chimp: [
+    ['chimp', '🐒', 'ch i m p'], ['shrimp', '🦐', 'sh r i m p'], ['squid', '🦑', 's qu i d'],
+    ['skunk', '🦨', 's k u n k'], ['sloth', '🦥', 's l o th'], ['bench', '🪑', 'b e n ch'],
+    ['lunch', '🥪', 'l u n ch'], ['chest', '🧰', 'ch e s t'], ['flash', '⚡', 'f l a sh'],
+    ['splash', '💦', 's p l a sh'], ['stamp', '📮', 's t a m p'], ['stump', '🌳', 's t u m p'],
+    ['frost', '❄️', 'f r o s t'], ['crust', '🍞', 'c r u s t'], ['drink', '🧃', 'd r i n k'],
+    ['whisk', '🥣', 'wh i s k']
+  ],
+  rocket: [
+    ['rocket', '🚀', 'r o ck e t'], ['jacket', '🧥', 'j a ck e t'], ['ticket', '🎟️', 't i ck e t'],
+    ['bucket', '🪣', 'b u ck e t'], ['pocket', '👖', 'p o ck e t'], ['helmet', '⛑️', 'h e l m e t'],
+    ['magnet', '🧲', 'm a g n e t'], ['cactus', '🌵', 'c a c t u s'], ['sunset', '🌅', 's u n s e t'],
+    ['picnic', '🧺', 'p i c n i c'], ['pumpkin', '🎃', 'p u m p k i n'], ['dragon', '🐉', 'd r a g o n'],
+    ['lemon', '🍋', 'l e m o n'], ['melon', '🍈', 'm e l o n'], ['wagon', '🛒', 'w a g o n'],
+    ['robin', '🐦', 'r o b i n'], ['seven', '7️⃣', 's e v e n'], ['napkin', '🧻', 'n a p k i n']
   ]
 };
 

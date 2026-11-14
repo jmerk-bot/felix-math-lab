@@ -6,6 +6,7 @@ import { TILES, LEVELS, WORDS, PHRASES, tileKind, wordAudio, phraseAudio } from 
 import { playTick, playSuccessChord, playClips, preloadClips } from './audio.js';
 import { journeyOn, recordWord } from './journey.js';
 import { renderJourney, pieceClip } from './journey-ui.js';
+import { canOfferCrunch, grantCrunchBreak } from './crunchlabs.js';
 
 const $ = (id) => document.getElementById(id);
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
@@ -132,6 +133,7 @@ function checkSpelling() {
       award = recordWord();
       renderJourney({ snap: award?.part });
     } else {
+      if (spell.returnTo === 'quest') grantCrunchBreak();
       state.quest.solvedSinceSpelling = 0;
     }
     playSuccessChord();
@@ -178,8 +180,8 @@ export function renderSpell() {
   const spell = state.spell;
   const bonus = spell.returnTo === 'quest';
 
-  // Level pills (Words mode) or a "word break" chip (when interrupting Math)
-  $('spell-levels').hidden = bonus;
+  // Level pills stay visible even on a word break so challenge levels can be toggled anytime
+  $('spell-levels').hidden = false;
   $('spell-bonus').hidden = !bonus;
   document.querySelectorAll('.level-pill').forEach((pill) => {
     pill.classList.toggle('active', spell.levels.includes(pill.dataset.value));
@@ -199,7 +201,9 @@ export function renderSpell() {
 
   // Sound boxes. After two tries, empty boxes show a faint hint of their tile.
   const showHints = spell.attempts >= 2;
-  $('spell-boxes').innerHTML = spell.word.sounds.map((sound, i) => {
+  const boxesEl = $('spell-boxes');
+  boxesEl.dataset.size = spell.word.sounds.length >= 6 ? 'm' : '';
+  boxesEl.innerHTML = spell.word.sounds.map((sound, i) => {
     const tile = spell.boxes[i];
     if (tile === null) {
       return `<span class="sound-box empty">${showHints ? `<span class="ghost">${sound}</span>` : ''}</span>`;
@@ -210,5 +214,6 @@ export function renderSpell() {
 
   $('spell-keyboard').hidden = solved;
   $('spell-solved').hidden = !solved;
+  $('spell-crunch').hidden = !(solved && canOfferCrunch());
   $('spell-next').textContent = bonus ? 'Back to Math 🚀' : 'Next Word ➔';
 }

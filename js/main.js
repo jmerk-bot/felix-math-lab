@@ -10,6 +10,7 @@ import { buildKeyboard, pressTile, renderSpell, sayWord, startWord, toggleLevel 
 import { closeSettings, initSettings, renderSettings, settingsOpen, saveCloudSettings, clearCloudSettings } from './settings.js';
 import * as J from './journey.js';
 import * as UI from './journey-ui.js';
+import { initCrunch, crunchOpen, openCrunch, toggleCrunchPlay, nextCrunchVideo, closeCrunch, dismissCrunchBreak } from './crunchlabs.js';
 import { initPwa } from './pwa.js';
 import { initCloud } from './cloud.js';
 
@@ -84,6 +85,7 @@ function startMathBreak() {
 function nextQuest() {
   const q = state.quest;
   if (!J.journeyOn()) {
+    dismissCrunchBreak();
     if (q.status === 'correct' && q.solvedSinceSpelling >= SPELL_EVERY) startWordBreak();
     else generateNewQuest();
     return;
@@ -92,6 +94,7 @@ function nextQuest() {
     generateNewQuest();
     return;
   }
+  if (!state.journey.pendingComplete) dismissCrunchBreak();
   const fromWords = q.returnTo === 'spell';
   q.returnTo = null;
   if (state.journey.pendingComplete) startCompletion(fromWords ? 'spell' : 'quest');
@@ -151,10 +154,12 @@ function afterWord() {
   const fromQuest = state.spell.returnTo === 'quest';
   state.spell.returnTo = null;
   if (!J.journeyOn()) {
+    dismissCrunchBreak();
     if (fromQuest) resume('quest');
     else startWord(null);
     return;
   }
+  if (!state.journey.pendingComplete) dismissCrunchBreak();
   if (state.journey.pendingComplete) startCompletion(fromQuest ? 'quest' : 'spell');
   else if (fromQuest) resume('quest');
   else if (J.needsMathBreak()) startMathBreak();
@@ -198,6 +203,7 @@ function launchNewRocket() {
 // "Next rocket" in the hangar: brief the next mission, or a practice flight,
 // or (destination finished) the banner to ask Dad for the keys
 function continueJourney() {
+  dismissCrunchBreak();
   const outcome = flow.outcome;
   flow.outcome = null;
   if (outcome === 'next') {
@@ -238,7 +244,10 @@ function relaunch(index) {
 
 // Every button declares what it does with data-action (and data-value).
 const actions = {
-  'home': () => switchMode('home'),
+  'home': () => {
+    if (!state.journey.pendingComplete) dismissCrunchBreak();
+    switchMode('home');
+  },
   'pick-math': () => pickMath(),
   'pick-words': () => pickWords(),
   'open-hangar': () => switchMode('hangar'),
@@ -272,6 +281,13 @@ const actions = {
     renderSettings();
     UI.renderJourney();
   },
+  'settings-crunch': (value) => {
+    state.crunch.enabled = value === 'on';
+    if (!state.crunch.enabled) dismissCrunchBreak();
+    renderQuest();
+    renderSpell();
+    renderSettings();
+  },
   'settings-close': () => closeSettings(),
   'cloud-save': () => saveCloudSettings(),
   'cloud-clear': () => clearCloudSettings(),
@@ -291,7 +307,24 @@ const actions = {
   'briefing-go': () => briefingDone(),
   'keys-open': () => UI.openKeys(),
   'keys-key': (value) => keysKey(value),
-  'journey-close': () => UI.closeOverlay()
+  'journey-close': () => UI.closeOverlay(),
+  'crunch-open': (value) => {
+    if (value === 'hangar') {
+      $('hangar-crunch').hidden = true;
+      openCrunch({
+        onDone: () => {
+          if (state.mode === 'hangar') UI.renderHangar({ showContinue: flow.outcome !== null });
+        }
+      });
+    } else if (value === 'spell') {
+      openCrunch({ onDone: () => afterWord() });
+    } else {
+      openCrunch({ onDone: () => nextQuest() });
+    }
+  },
+  'crunch-toggle': () => toggleCrunchPlay(),
+  'crunch-next': () => nextCrunchVideo(),
+  'crunch-close': () => closeCrunch()
 };
 
 const NO_TOUCH_ACTIONS = new Set(['cloud-save', 'cloud-clear', 'settings-close']);
@@ -307,7 +340,7 @@ document.addEventListener('click', (event) => {
 // A physical keyboard drives the number pad and letter tiles too (handy when
 // testing on a computer). Digraph tiles are tap-only.
 document.addEventListener('keydown', (event) => {
-  if (event.metaKey || event.ctrlKey || event.altKey || settingsOpen() || UI.overlayOpen()) return;
+  if (event.metaKey || event.ctrlKey || event.altKey || settingsOpen() || UI.overlayOpen() || crunchOpen()) return;
   const k = event.key;
   if (state.mode === 'quest') {
     const key = /^[0-9]$/.test(k) ? k : k === 'Backspace' ? 'back' : k === 'Enter' ? 'solve' : null;
@@ -335,7 +368,7 @@ function refreshAfterStateLoad() {
   else generateNewQuest();
   renderSpell();
   if (settingsOpen()) renderSettings();
-  if (state.mode === 'hangar') UI.renderHangar();
+  if (state.mode === 'hangar') UI.renderHangar({ showContinue: flow.outcome !== null });
   UI.renderJourney();
 }
 
@@ -343,6 +376,7 @@ function refreshAfterStateLoad() {
 loadState();
 buildKeyboard();
 initSettings();
+initCrunch();
 refreshAfterStateLoad();
 switchMode('home', { boot: true });
 initPwa();

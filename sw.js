@@ -34,6 +34,7 @@ const APP_SHELL = [
   './js/voice.js',
   './js/journey.js',
   './js/journey-ui.js',
+  './js/crunchlabs.js',
   './js/cloud.js',
   './fonts/atkinson-hyperlegible-next-latin.woff2',
   './manifest.webmanifest',

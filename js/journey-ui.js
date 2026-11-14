@@ -10,6 +10,7 @@ import { playClips, playTick, playRumble, stopClips } from './audio.js';
 import { fmt } from './levels.js';
 import { manipulativeHtml } from './lab.js';
 import * as J from './journey.js';
+import { canOfferCrunch } from './crunchlabs.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -72,6 +73,7 @@ export function renderHangar({ highlightLast = false, showContinue = false } = {
       </section>`;
   }).join('');
   $('hangar-continue').hidden = !showContinue;
+  $('hangar-crunch').hidden = !(showContinue && canOfferCrunch());
 }
 
 // ---------- Overlays ----------

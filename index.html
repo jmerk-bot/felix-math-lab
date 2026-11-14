@@ -76,6 +76,8 @@
             <button class="level-pill active" data-action="spell-level" data-value="cat">cat</button>
             <button class="level-pill active" data-action="spell-level" data-value="ship">ship</button>
             <button class="level-pill active" data-action="spell-level" data-value="frog">frog</button>
+            <button class="level-pill" data-action="spell-level" data-value="chimp">chimp</button>
+            <button class="level-pill" data-action="spell-level" data-value="rocket">rocket</button>
           </div>
           <span id="spell-bonus" class="bonus-chip" hidden>⭐ Word break</span>
           <div class="toolbar-right">
@@ -99,6 +101,7 @@
             <div id="spell-boxes" class="sound-boxes"></div>
             <div id="spell-keyboard" class="tile-keyboard" role="group" aria-label="Letter tiles"></div>
             <div id="spell-solved" class="quest-solved-controls" hidden>
+              <button id="spell-crunch" class="crunch-btn" data-action="crunch-open" data-value="spell" hidden>🎬 Watch 3m CrunchLabs</button>
               <button id="spell-next" class="next-quest-btn" data-action="spell-next">Next Word ➔</button>
             </div>
           </div>
@@ -235,6 +238,7 @@
         </div>
 
         <div id="quest-solved-controls" class="quest-solved-controls" hidden>
+          <button id="quest-crunch" class="crunch-btn" data-action="crunch-open" data-value="quest" hidden>🎬 Watch 3m CrunchLabs</button>
           <button class="next-quest-btn" data-action="quest-next">Next Quest 🚀</button>
         </div>
 
@@ -252,13 +256,19 @@
     <div id="view-hangar" class="view" hidden>
       <section class="card hangar-card">
         <div id="hangar-list"></div>
-        <button id="hangar-continue" class="next-quest-btn" data-action="hangar-continue" hidden>Next rocket ➔</button>
+        <div class="hangar-actions">
+          <button id="hangar-crunch" class="crunch-btn" data-action="crunch-open" data-value="hangar" hidden>🎬 Watch 3m CrunchLabs</button>
+          <button id="hangar-continue" class="next-quest-btn" data-action="hangar-continue" hidden>Next rocket ➔</button>
+        </div>
       </section>
     </div>
   </main>
 
   <!-- Rocket journey overlays: paint job, launch, briefing, keys (js/journey-ui.js) -->
   <div id="journey-overlay" class="journey-overlay" hidden></div>
+
+  <!-- CrunchLabs 3-minute video break overlay (js/crunchlabs.js) -->
+  <div id="crunch-overlay" class="journey-overlay crunch-overlay" hidden></div>
 
   <!-- GROWN-UP SETTINGS (js/settings.js) -->
   <div id="settings" class="settings-overlay" hidden>
@@ -271,6 +281,11 @@
         <h3>Mystery Quest</h3>
         <p class="settings-help">The rocket journey leads through math concepts in order. Classic quests use the level and the operation buttons instead.</p>
         <div id="settings-journey" class="settings-levels settings-pair"></div>
+      </div>
+      <div class="settings-section">
+        <h3>CrunchLabs reward break</h3>
+        <p class="settings-help">Offers an optional 3-minute CrunchLabs episode break each time Felix earns a rocket piece, resuming where he left off.</p>
+        <div id="settings-crunch" class="settings-levels settings-pair"></div>
       </div>
       <div class="settings-section">
         <h3>Math level</h3>
