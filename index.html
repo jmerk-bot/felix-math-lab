@@ -28,8 +28,8 @@
       <div class="brand-icon">F</div>
       <h1 id="app-title">Felix's Lab</h1>
     </div>
-    <!-- Grown-up settings: hold for 3 seconds (a tap does nothing) -->
-    <button id="settings-btn" class="settings-btn" aria-label="Grown-up settings (hold for 3 seconds)">
+    <!-- Grown-up settings (password-protected) -->
+    <button id="settings-btn" class="settings-btn" data-action="settings-open" aria-label="Grown-up settings">
       <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -277,34 +277,67 @@
         <h2 id="settings-title">Grown-up settings</h2>
         <button class="settings-close" data-action="settings-close" aria-label="Close settings">✕</button>
       </div>
-      <div class="settings-section">
-        <h3>Mystery Quest</h3>
-        <p class="settings-help">The rocket journey leads through math concepts in order. Classic quests use the level and the operation buttons instead.</p>
-        <div id="settings-journey" class="settings-levels settings-pair"></div>
-      </div>
-      <div class="settings-section">
-        <h3>CrunchLabs reward break</h3>
-        <p class="settings-help">Tiered episode breaks: 1 minute per rocket piece, plus a 2- or 3-minute bonus after launching a finished rocket.</p>
-        <div id="settings-crunch" class="settings-levels settings-pair"></div>
-      </div>
-      <div class="settings-section">
-        <h3>Math level</h3>
-        <p class="settings-help">Sets how hard Mystery Quest is and how big the Lab's numbers go. In the rocket journey it's the planet Felix is on; finishing a planet unlocks the next with Dad's keys.</p>
-        <div id="settings-levels" class="settings-levels"></div>
-      </div>
-      <div class="settings-section">
-        <h3>Cloud backup</h3>
-        <p class="settings-help">Saves progress to a private GitHub Gist every active minute and restores it automatically if this device is behind. Enter a GitHub token with <code>gist</code> access.</p>
-        <div class="cloud-controls">
-          <input id="cloud-token" class="cloud-input" type="password" placeholder="GitHub token (ghp_… or github_pat_…)" autocomplete="off" spellcheck="false" aria-label="GitHub token with gist access">
-          <div class="cloud-actions">
-            <button class="settings-level cloud-btn" data-action="cloud-save">Save &amp; Sync</button>
-            <button id="cloud-clear" class="settings-level cloud-btn cloud-clear" data-action="cloud-clear" hidden>Disconnect</button>
-          </div>
-          <p id="cloud-status" class="cloud-status"></p>
+
+      <!-- Password lock screen -->
+      <div id="settings-lock" class="settings-lock">
+        <p class="settings-help">Enter the 4-digit password to unlock settings.</p>
+        <div id="settings-pin-dots" class="pin-dots" aria-label="Password digits entered"></div>
+        <div class="keypad settings-keypad" role="group" aria-label="Password keypad">
+          <button class="key" data-action="settings-pin" data-value="1">1</button>
+          <button class="key" data-action="settings-pin" data-value="2">2</button>
+          <button class="key" data-action="settings-pin" data-value="3">3</button>
+          <button class="key" data-action="settings-pin" data-value="4">4</button>
+          <button class="key" data-action="settings-pin" data-value="5">5</button>
+          <button class="key" data-action="settings-pin" data-value="6">6</button>
+          <button class="key" data-action="settings-pin" data-value="7">7</button>
+          <button class="key" data-action="settings-pin" data-value="8">8</button>
+          <button class="key" data-action="settings-pin" data-value="9">9</button>
+          <button class="key key-back" data-action="settings-pin" data-value="back" aria-label="Delete">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 5H8.5L3 12l5.5 7H21a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/>
+              <path d="M11.5 9.5l5 5M16.5 9.5l-5 5"/>
+            </svg>
+          </button>
+          <button class="key" data-action="settings-pin" data-value="0">0</button>
+          <button class="key key-solve" data-action="settings-pin" data-value="enter" aria-label="Unlock">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12.5l4.5 4.5L19 7.5"/>
+            </svg>
+          </button>
         </div>
       </div>
-      <button class="next-quest-btn settings-done" data-action="settings-close">Done</button>
+
+      <!-- Unlocked settings body -->
+      <div id="settings-body" class="settings-body" hidden>
+        <div class="settings-section">
+          <h3>Mystery Quest</h3>
+          <p class="settings-help">The rocket journey leads through math concepts in order. Classic quests use the level and the operation buttons instead.</p>
+          <div id="settings-journey" class="settings-levels settings-pair"></div>
+        </div>
+        <div class="settings-section">
+          <h3>CrunchLabs reward break</h3>
+          <p class="settings-help">Tiered episode breaks: 1 minute per rocket piece, plus a 2- or 3-minute bonus after launching a finished rocket.</p>
+          <div id="settings-crunch" class="settings-levels settings-pair"></div>
+        </div>
+        <div class="settings-section">
+          <h3>Math level</h3>
+          <p class="settings-help">Sets how hard Mystery Quest is and how big the Lab's numbers go. In the rocket journey it's the planet Felix is on; finishing a planet unlocks the next with Dad's keys.</p>
+          <div id="settings-levels" class="settings-levels"></div>
+        </div>
+        <div class="settings-section">
+          <h3>Cloud backup</h3>
+          <p class="settings-help">Saves progress to a private GitHub Gist every active minute and restores it automatically if this device is behind. Enter a GitHub token with <code>gist</code> access.</p>
+          <div class="cloud-controls">
+            <input id="cloud-token" class="cloud-input" type="password" placeholder="GitHub token (ghp_… or github_pat_…)" autocomplete="off" spellcheck="false" aria-label="GitHub token with gist access">
+            <div class="cloud-actions">
+              <button class="settings-level cloud-btn" data-action="cloud-save">Save &amp; Sync</button>
+              <button id="cloud-clear" class="settings-level cloud-btn cloud-clear" data-action="cloud-clear" hidden>Disconnect</button>
+            </div>
+            <p id="cloud-status" class="cloud-status"></p>
+          </div>
+        </div>
+        <button class="next-quest-btn settings-done" data-action="settings-close">Done</button>
+      </div>
     </section>
   </div>
 

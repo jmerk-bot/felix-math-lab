@@ -7,7 +7,7 @@ import { playChime } from './audio.js';
 import { clampLab, renderLab, setLabOp, stepA, stepB } from './lab.js';
 import { generateNewQuest, pressKey, renderQuest, renderQuestBanner, setLevel, toggleQuestFilter } from './quest.js';
 import { buildKeyboard, pressTile, renderSpell, sayWord, startWord, toggleLevel } from './spell.js';
-import { closeSettings, initSettings, renderSettings, settingsOpen, saveCloudSettings, clearCloudSettings } from './settings.js';
+import { openSettings, closeSettings, initSettings, renderSettings, settingsOpen, settingsUnlocked, pressSettingsPin, saveCloudSettings, clearCloudSettings } from './settings.js';
 import * as J from './journey.js';
 import * as UI from './journey-ui.js';
 import { initCrunch, crunchOpen, openCrunch, toggleCrunchPlay, nextCrunchVideo, closeCrunch, dismissCrunchBreak } from './crunchlabs.js';
@@ -263,7 +263,10 @@ const actions = {
   'step-a': (value) => stepA(Number(value)),
   'step-b': (value) => stepB(Number(value)),
   'quest-filter': (value) => toggleQuestFilter(value),
+  'settings-open': () => openSettings(),
+  'settings-pin': (value) => pressSettingsPin(value),
   'settings-level': (value) => {
+    if (!settingsUnlocked()) return;
     J.setJourneyLevel(Number(value));
     setLevel(Number(value));
     clampLab();
@@ -272,6 +275,7 @@ const actions = {
     UI.renderJourney();
   },
   'settings-journey': (value) => {
+    if (!settingsUnlocked()) return;
     state.journey.on = value === 'on';
     state.quest.returnTo = null;
     if (state.journey.on) state.quest.level = J.currentDestination().level;
@@ -282,6 +286,7 @@ const actions = {
     UI.renderJourney();
   },
   'settings-crunch': (value) => {
+    if (!settingsUnlocked()) return;
     if (value === 'off') {
       state.crunch.enabled = false;
       dismissCrunchBreak();
@@ -333,7 +338,7 @@ const actions = {
   'crunch-close': () => closeCrunch()
 };
 
-const NO_TOUCH_ACTIONS = new Set(['cloud-save', 'cloud-clear', 'settings-close']);
+const NO_TOUCH_ACTIONS = new Set(['cloud-save', 'cloud-clear', 'settings-open', 'settings-pin', 'settings-close']);
 
 document.addEventListener('click', (event) => {
   const el = event.target.closest('[data-action]');
@@ -346,8 +351,22 @@ document.addEventListener('click', (event) => {
 // A physical keyboard drives the number pad and letter tiles too (handy when
 // testing on a computer). Digraph tiles are tap-only.
 document.addEventListener('keydown', (event) => {
-  if (event.metaKey || event.ctrlKey || event.altKey || settingsOpen() || UI.overlayOpen() || crunchOpen()) return;
+  if (event.metaKey || event.ctrlKey || event.altKey) return;
   const k = event.key;
+  if (settingsOpen()) {
+    if (k === 'Escape') {
+      event.preventDefault();
+      closeSettings();
+    } else if (!settingsUnlocked()) {
+      const pinKey = /^[0-9]$/.test(k) ? k : k === 'Backspace' ? 'back' : k === 'Enter' ? 'enter' : null;
+      if (pinKey) {
+        event.preventDefault();
+        pressSettingsPin(pinKey);
+      }
+    }
+    return;
+  }
+  if (UI.overlayOpen() || crunchOpen()) return;
   if (state.mode === 'quest') {
     const key = /^[0-9]$/.test(k) ? k : k === 'Backspace' ? 'back' : k === 'Enter' ? 'solve' : null;
     if (!key) return;
@@ -373,7 +392,7 @@ function refreshAfterStateLoad() {
   if (state.quest.problem) renderQuest();
   else generateNewQuest();
   renderSpell();
-  if (settingsOpen()) renderSettings();
+  if (settingsOpen() && settingsUnlocked()) renderSettings();
   if (state.mode === 'hangar') UI.renderHangar({ showContinue: flow.outcome !== null });
   UI.renderJourney();
 }

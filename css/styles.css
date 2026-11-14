@@ -1220,15 +1220,7 @@ body[data-mode="lab"] .app-container {
 
 /* ---------- Grown-up settings ---------- */
 
-/* Quiet gear on Home. Holding it fills a ring for 3 seconds, then settings open. */
-@property --hold {
-  syntax: '<percentage>';
-  inherits: false;
-  initial-value: 0%;
-}
-
 .settings-btn {
-  position: relative;
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -1238,8 +1230,12 @@ body[data-mode="lab"] .app-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  touch-action: none;
-  -webkit-touch-callout: none;
+  cursor: pointer;
+}
+
+.settings-btn:active {
+  color: var(--accent-indigo-light);
+  transform: scale(0.95);
 }
 
 .settings-btn svg {
@@ -1247,28 +1243,51 @@ body[data-mode="lab"] .app-container {
   height: 26px;
 }
 
-.settings-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: conic-gradient(var(--accent-indigo-light) var(--hold), transparent 0);
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
-  opacity: 0;
+.settings-lock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 0 4px;
 }
 
-.settings-btn.holding {
+.pin-dots {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.pin-dot {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  border: 2px dashed #475569;
+  background: rgba(2, 6, 23, 0.55);
   color: var(--accent-indigo-light);
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.settings-btn.holding::before {
-  opacity: 1;
-  animation: hold-fill 3s linear forwards;
+.pin-dot.filled {
+  border-style: solid;
+  border-color: var(--accent-indigo-light);
+  background: rgba(79, 70, 229, 0.2);
 }
 
-@keyframes hold-fill {
-  to { --hold: 100%; }
+.pin-dot.error {
+  border-color: var(--accent-rose);
+}
+
+.settings-keypad {
+  max-width: 310px;
+}
+
+.settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .settings-overlay {

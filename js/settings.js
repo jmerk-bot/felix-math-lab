@@ -1,55 +1,104 @@
-// Grown-up settings. The gear on Home opens them only after a 3-second hold
-// (a ring fills while holding), so Felix can't change the level by accident.
-// A quick tap does nothing.
+// Grown-up settings, protected by a 4-digit password on an on-screen keypad
+// (masked as dots so digits aren't visible over a shoulder, and without opening
+// the tablet's software keyboard).
 
 import { state } from './state.js';
 import { LEVELS } from './levels.js';
 import { DESTINATIONS } from './missions.js';
+import { playChime, playTick, playSuccessChord } from './audio.js';
 import { cloudStatus, onCloudStatus, setCloudToken, clearCloudToken, syncWithCloud } from './cloud.js';
 
 const $ = (id) => document.getElementById(id);
-const HOLD_MS = 3000;
+const SETTINGS_PIN = '7812';
+
+let unlocked = false;
+let pinEntry = '';
 
 export function initSettings() {
-  const btn = $('settings-btn');
-  let timer = null;
-
-  const cancel = () => {
-    clearTimeout(timer);
-    timer = null;
-    btn.classList.remove('holding');
-  };
-  btn.addEventListener('pointerdown', (event) => {
-    event.preventDefault();
-    btn.classList.add('holding');
-    timer = setTimeout(() => {
-      cancel();
-      openSettings();
-    }, HOLD_MS);
-  });
-  ['pointerup', 'pointerleave', 'pointercancel'].forEach((type) => btn.addEventListener(type, cancel));
-  btn.addEventListener('contextmenu', (event) => event.preventDefault());
-
   $('cloud-token')?.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' && unlocked) {
       event.preventDefault();
       saveCloudSettings();
     }
   });
   onCloudStatus(() => {
-    if (settingsOpen()) renderCloudStatus();
+    if (settingsOpen() && unlocked) renderCloudStatus();
   });
 }
 
 export const settingsOpen = () => !$('settings').hidden;
+export const settingsUnlocked = () => unlocked;
+
+function renderPinDots(error = false) {
+  const dotsEl = $('settings-pin-dots');
+  if (!dotsEl) return;
+  dotsEl.innerHTML = [0, 1, 2, 3].map((i) => {
+    const filled = i < pinEntry.length;
+    return `<span class="pin-dot ${filled ? 'filled' : ''} ${error ? 'error' : ''}">${filled ? '●' : ''}</span>`;
+  }).join('');
+  dotsEl.classList.remove('wiggle');
+  if (error) {
+    void dotsEl.offsetWidth;
+    dotsEl.classList.add('wiggle');
+  }
+}
+
+function syncLockView() {
+  $('settings-lock').hidden = unlocked;
+  $('settings-body').hidden = !unlocked;
+}
 
 export function openSettings() {
-  renderSettings();
+  unlocked = false;
+  pinEntry = '';
+  renderPinDots();
+  syncLockView();
   $('settings').hidden = false;
 }
 
 export function closeSettings() {
+  unlocked = false;
+  pinEntry = '';
   $('settings').hidden = true;
+}
+
+export function pressSettingsPin(key) {
+  if (!settingsOpen() || unlocked) return;
+
+  if (key === 'back') {
+    if (!pinEntry) return;
+    pinEntry = pinEntry.slice(0, -1);
+    playTick();
+    renderPinDots();
+    return;
+  }
+
+  if (key === 'enter') {
+    if (pinEntry.length < 4) {
+      playChime(1);
+      renderPinDots(true);
+    }
+    return;
+  }
+
+  if (!/^[0-9]$/.test(key) || pinEntry.length >= 4) return;
+  pinEntry += key;
+  playTick();
+  renderPinDots();
+
+  if (pinEntry.length === 4) {
+    if (pinEntry === SETTINGS_PIN) {
+      unlocked = true;
+      pinEntry = '';
+      playSuccessChord();
+      renderSettings();
+      syncLockView();
+    } else {
+      pinEntry = '';
+      playChime(1);
+      renderPinDots(true);
+    }
+  }
 }
 
 export function renderSettings() {
@@ -101,6 +150,7 @@ export function renderCloudStatus() {
 }
 
 export function saveCloudSettings() {
+  if (!unlocked) return;
   const input = $('cloud-token');
   const val = input?.value.trim() || '';
   if (val) {
@@ -115,6 +165,7 @@ export function saveCloudSettings() {
 }
 
 export function clearCloudSettings() {
+  if (!unlocked) return;
   const input = $('cloud-token');
   if (input) input.value = '';
   clearCloudToken();
